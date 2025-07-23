@@ -37,6 +37,8 @@ import {
   Wallet,
   ArrowUpRight,
   ArrowDownLeft,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 export default function BillingPage() {
@@ -50,119 +52,78 @@ export default function BillingPage() {
   const [error, setError] = useState("");
   const [snapLoaded, setSnapLoaded] = useState(false);
 
-  // Mock data for transaction history (top-ups and purchases)
-  const transactionHistory = [
-    {
-      id: 1,
-      date: "2024-02-15",
-      type: "purchase",
-      description: "Web Hosting Premium - 1 Month",
-      amount: -450000,
-      status: "completed",
-      reference: "TXN-2024-001",
-    },
-    {
-      id: 2,
-      date: "2024-02-14",
-      type: "topup",
-      description: "Top Up via Payment Gateway",
-      amount: 1000000,
-      status: "completed",
-      reference: "TOP-2024-015",
-    },
-    {
-      id: 3,
-      date: "2024-02-10",
-      type: "purchase",
-      description: "Domain Registration - .com",
-      amount: -150000,
-      status: "completed",
-      reference: "TXN-2024-002",
-    },
-    {
-      id: 4,
-      date: "2024-02-08",
-      type: "purchase",
-      description: "SSL Certificate - 1 Year",
-      amount: -200000,
-      status: "completed",
-      reference: "TXN-2024-003",
-    },
-    {
-      id: 5,
-      date: "2024-02-05",
-      type: "topup",
-      description: "Top Up via Payment Gateway",
-      amount: 2000000,
-      status: "completed",
-      reference: "TOP-2024-012",
-    },
-    {
-      id: 6,
-      date: "2024-01-28",
-      type: "purchase",
-      description: "Database Service - 1 Month",
-      amount: -300000,
-      status: "completed",
-      reference: "TXN-2024-004",
-    },
-    {
-      id: 7,
-      date: "2024-01-25",
-      type: "topup",
-      description: "Top Up via Payment Gateway",
-      amount: 500000,
-      status: "completed",
-      reference: "TOP-2024-008",
-    },
-    {
-      id: 8,
-      date: "2024-01-20",
-      type: "purchase",
-      description: "CDN Service - 1 Month",
-      amount: -100000,
-      status: "completed",
-      reference: "TXN-2024-005",
-    },
-  ];
+  // Transaction states
+  const [transactions, setTransactions] = useState([]);
+  const [transactionsLoading, setTransactionsLoading] = useState(true);
+  const [transactionsError, setTransactionsError] = useState("");
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 20,
+    total: 0,
+    totalPages: 1,
+  });
 
-  const filteredHistory = transactionHistory.filter(
+  // Filter transactions based on search term
+  const filteredTransactions = transactions.filter(
     (item) =>
       item.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.reference.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const formatCurrency = (amount) => {
+    const numAmount = typeof amount === "string" ? parseInt(amount) : amount;
     return new Intl.NumberFormat("id-ID", {
       style: "currency",
       currency: "IDR",
       minimumFractionDigits: 0,
-    }).format(Math.abs(amount));
+    }).format(Math.abs(numAmount));
   };
 
   const getStatusBadge = (status) => {
     const statusConfig = {
+      SUCCESS: {
+        variant: "default",
+        className: "bg-green-100 text-green-800",
+        label: "Success",
+      },
+      PENDING: {
+        variant: "secondary",
+        className: "bg-yellow-100 text-yellow-800",
+        label: "Pending",
+      },
+      FAILED: {
+        variant: "destructive",
+        className: "bg-red-100 text-red-800",
+        label: "Failed",
+      },
+      // Legacy support for lowercase
       completed: {
         variant: "default",
         className: "bg-green-100 text-green-800",
+        label: "Completed",
       },
       pending: {
         variant: "secondary",
         className: "bg-yellow-100 text-yellow-800",
+        label: "Pending",
       },
-      failed: { variant: "destructive", className: "bg-red-100 text-red-800" },
+      failed: {
+        variant: "destructive",
+        className: "bg-red-100 text-red-800",
+        label: "Failed",
+      },
     };
 
-    const config = statusConfig[status] || statusConfig.pending;
+    const config = statusConfig[status] || statusConfig.PENDING;
     return (
       <Badge variant={config.variant} className={config.className}>
-        {status.charAt(0).toUpperCase() + status.slice(1)}
+        {config.label}
       </Badge>
     );
   };
 
   const getTransactionIcon = (type) => {
-    return type === "topup" ? (
+    return type === "TOPUP" || type === "topup" ? (
       <ArrowDownLeft className="h-4 w-4 text-green-600" />
     ) : (
       <ArrowUpRight className="h-4 w-4 text-red-600" />
@@ -204,6 +165,42 @@ export default function BillingPage() {
     }
   };
 
+  // Fetch transactions from API
+  const fetchTransactions = async (page = 1, limit = 20) => {
+    if (!session?.accessToken) return;
+
+    try {
+      setTransactionsLoading(true);
+      setTransactionsError("");
+
+      const response = await fetch(
+        `${
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"
+        }/api/v1/billing/transactions?page=${page}&limit=${limit}`,
+        {
+          headers: {
+            Authorization: `Bearer ${session.accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setTransactions(data.data.transactions);
+        setPagination(data.data.pagination);
+      } else {
+        setTransactionsError(data.message || "Failed to fetch transactions");
+      }
+    } catch (err) {
+      setTransactionsError("An error occurred while fetching transactions");
+      console.error("Error fetching transactions:", err);
+    } finally {
+      setTransactionsLoading(false);
+    }
+  };
+
   // Handle top-up with Midtrans integration
   const handleTopUp = async () => {
     if (!session?.accessToken || !topUpAmount) return;
@@ -240,13 +237,15 @@ export default function BillingPage() {
           window.snap.pay(data.data.snapToken, {
             onSuccess: function (result) {
               console.log("Payment success:", result);
-              // Refresh balance after successful payment
+              // Refresh balance and transactions after successful payment
               fetchBalance();
+              fetchTransactions();
             },
             onPending: function (result) {
               console.log("Payment pending:", result);
-              // Refresh balance after pending payment
+              // Refresh balance and transactions after pending payment
               fetchBalance();
+              fetchTransactions();
             },
             onError: function (result) {
               console.log("Payment error:", result);
@@ -254,8 +253,9 @@ export default function BillingPage() {
             },
             onClose: function () {
               console.log("Payment popup closed");
-              // Refresh balance when popup is closed
+              // Refresh balance and transactions when popup is closed
               fetchBalance();
+              fetchTransactions();
             },
           });
         } else if (data.data.redirectUrl) {
@@ -265,6 +265,7 @@ export default function BillingPage() {
           setIsTopUpDialogOpen(false);
           setTimeout(() => {
             fetchBalance();
+            fetchTransactions();
           }, 1000);
         }
       } else {
@@ -278,12 +279,87 @@ export default function BillingPage() {
     }
   };
 
-  // Fetch balance on component mount
+  // Fetch balance and transactions on component mount
   useEffect(() => {
     if (session?.accessToken) {
       fetchBalance();
+      fetchTransactions();
     }
   }, [session?.accessToken]);
+
+  // Handle Pay Now for pending transactions
+  const handlePayNow = async (transactionId) => {
+    if (!session?.accessToken) return;
+
+    try {
+      setError("");
+
+      const response = await fetch(
+        `${
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"
+        }/api/v1/billing/transactions/${transactionId}/pay`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${session.accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        // Use Snap.js popup for payment
+        if (data.data.snapToken && window.snap) {
+          window.snap.pay(data.data.snapToken, {
+            onSuccess: function (result) {
+              console.log("Payment success:", result);
+              // Refresh balance and transactions after successful payment
+              fetchBalance();
+              fetchTransactions();
+            },
+            onPending: function (result) {
+              console.log("Payment pending:", result);
+              // Refresh balance and transactions after pending payment
+              fetchBalance();
+              fetchTransactions();
+            },
+            onError: function (result) {
+              console.log("Payment error:", result);
+              setError("Payment failed. Please try again.");
+            },
+            onClose: function () {
+              console.log("Payment popup closed");
+              // Refresh balance and transactions when popup is closed
+              fetchBalance();
+              fetchTransactions();
+            },
+          });
+        } else if (data.data.redirectUrl) {
+          // Fallback to redirect if Snap.js is not available
+          window.open(data.data.redirectUrl, "_blank");
+          setTimeout(() => {
+            fetchBalance();
+            fetchTransactions();
+          }, 1000);
+        }
+      } else {
+        setError(data.message || "Failed to process payment");
+      }
+    } catch (err) {
+      setError("An error occurred while processing payment");
+      console.error("Error processing payment:", err);
+    }
+  };
+
+  // Handle pagination
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= pagination.totalPages) {
+      setPagination((prev) => ({ ...prev, page: newPage }));
+      fetchTransactions(newPage, pagination.limit);
+    }
+  };
 
   // Handle dialog open - clear error
   const handleDialogOpen = (open) => {
@@ -461,39 +537,156 @@ export default function BillingPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredHistory.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell>
-                      {new Date(item.date).toLocaleDateString("id-ID")}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center space-x-2">
-                        {getTransactionIcon(item.type)}
-                        <span className="capitalize">{item.type}</span>
+                {transactionsLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8">
+                      <div className="flex items-center justify-center space-x-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900"></div>
+                        <span>Loading transactions...</span>
                       </div>
                     </TableCell>
-                    <TableCell>{item.description}</TableCell>
-                    <TableCell
-                      className={`font-medium ${
-                        item.amount > 0 ? "text-green-600" : "text-red-600"
-                      }`}
-                    >
-                      {item.amount > 0 ? "+" : ""}
-                      {formatCurrency(item.amount)}
-                    </TableCell>
-                    <TableCell>{getStatusBadge(item.status)}</TableCell>
-                    <TableCell className="font-mono text-sm">
-                      {item.reference}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="sm">
-                        <Download className="h-4 w-4" />
-                      </Button>
+                  </TableRow>
+                ) : transactionsError ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8">
+                      <div className="text-red-600">{transactionsError}</div>
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : filteredTransactions.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8">
+                      <div className="text-gray-500">No transactions found</div>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredTransactions.map((item) => (
+                    <TableRow key={item.id}>
+                      <TableCell>
+                        {new Date(item.date).toLocaleDateString("id-ID")}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center space-x-2">
+                          {getTransactionIcon(item.type)}
+                          <span className="capitalize">
+                            {item.type.toLowerCase()}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>{item.description}</TableCell>
+                      <TableCell
+                        className={`font-medium ${
+                          item.type === "TOPUP"
+                            ? "text-green-600"
+                            : "text-red-600"
+                        }`}
+                      >
+                        {item.type === "TOPUP" ? "+" : "-"}
+                        {formatCurrency(item.amount)}
+                      </TableCell>
+                      <TableCell>{getStatusBadge(item.status)}</TableCell>
+                      <TableCell className="font-mono text-sm">
+                        {item.reference}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end space-x-2">
+                          {item.actions?.canPay && (
+                            <Button
+                              variant="default"
+                              size="sm"
+                              onClick={() => handlePayNow(item.id)}
+                              className="bg-blue-600 hover:bg-blue-700"
+                            >
+                              Pay Now
+                            </Button>
+                          )}
+                          {item.actions?.canDownloadInvoice && (
+                            <Button variant="ghost" size="sm">
+                              <Download className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
+
+            {/* Pagination Controls */}
+            {pagination.totalPages > 1 && (
+              <div className="flex items-center justify-between px-2 py-4">
+                <div className="text-sm text-gray-700">
+                  Showing {(pagination.page - 1) * pagination.limit + 1} to{" "}
+                  {Math.min(
+                    pagination.page * pagination.limit,
+                    pagination.total
+                  )}{" "}
+                  of {pagination.total} transactions
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePageChange(pagination.page - 1)}
+                    disabled={pagination.page === 1 || transactionsLoading}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    Previous
+                  </Button>
+
+                  <div className="flex items-center space-x-1">
+                    {Array.from(
+                      { length: Math.min(5, pagination.totalPages) },
+                      (_, i) => {
+                        let pageNum;
+                        if (pagination.totalPages <= 5) {
+                          pageNum = i + 1;
+                        } else if (pagination.page <= 3) {
+                          pageNum = i + 1;
+                        } else if (
+                          pagination.page >=
+                          pagination.totalPages - 2
+                        ) {
+                          pageNum = pagination.totalPages - 4 + i;
+                        } else {
+                          pageNum = pagination.page - 2 + i;
+                        }
+
+                        return (
+                          <Button
+                            key={pageNum}
+                            variant={
+                              pagination.page === pageNum
+                                ? "default"
+                                : "outline"
+                            }
+                            size="sm"
+                            onClick={() => handlePageChange(pageNum)}
+                            disabled={transactionsLoading}
+                            className="w-8 h-8 p-0"
+                          >
+                            {pageNum}
+                          </Button>
+                        );
+                      }
+                    )}
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePageChange(pagination.page + 1)}
+                    disabled={
+                      pagination.page === pagination.totalPages ||
+                      transactionsLoading
+                    }
+                  >
+                    Next
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
