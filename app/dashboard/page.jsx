@@ -18,6 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import UserList from "@/components/UserList";
 import ServiceList from "@/components/ServiceList";
 import WorkerList from "@/components/WorkerList";
+import PodList from "@/components/PodList";
 
 export default function Dashboard() {
   const { data: session, status } = useSession();
@@ -126,9 +127,10 @@ export default function Dashboard() {
 
         {/* Tabs Section */}
         <Tabs defaultValue="users" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="users">User Management</TabsTrigger>
             <TabsTrigger value="services">Service Management</TabsTrigger>
+            <TabsTrigger value="pods">Pod Management</TabsTrigger>
             <TabsTrigger value="workers">Worker Nodes</TabsTrigger>
           </TabsList>
 
@@ -138,6 +140,10 @@ export default function Dashboard() {
 
           <TabsContent value="services" className="mt-6">
             <ServiceList />
+          </TabsContent>
+
+          <TabsContent value="pods" className="mt-6">
+            <PodList />
           </TabsContent>
 
           <TabsContent value="workers" className="mt-6">

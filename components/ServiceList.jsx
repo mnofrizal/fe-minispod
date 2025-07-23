@@ -61,7 +61,7 @@ export default function ServiceList() {
 
   const formatPrice = (price) => {
     const numPrice = parseFloat(price);
-    return numPrice === 0 ? "Free" : `$${numPrice}/month`;
+    return numPrice === 0 ? "Free" : `Rp ${numPrice.toLocaleString()}/month`;
   };
 
   const formatDate = (dateString) => {
@@ -125,9 +125,10 @@ export default function ServiceList() {
                 <TableHead>Service</TableHead>
                 <TableHead>Description</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Version</TableHead>
+                <TableHead>Variant</TableHead>
                 <TableHead>Price</TableHead>
                 <TableHead>Resources</TableHead>
+                <TableHead>Quota</TableHead>
                 <TableHead>Port</TableHead>
                 <TableHead>Subscriptions</TableHead>
                 <TableHead>Created</TableHead>
@@ -165,7 +166,9 @@ export default function ServiceList() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline">{service.version}</Badge>
+                    <Badge variant="outline">
+                      {service.variantDisplayName}
+                    </Badge>
                   </TableCell>
                   <TableCell>
                     <Badge
@@ -187,6 +190,23 @@ export default function ServiceList() {
                         RAM: {service.memRequest}/{service.memLimit}
                       </div>
                     </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={
+                        service.availableQuota === 0
+                          ? "destructive"
+                          : service.availableQuota === -1
+                          ? "secondary"
+                          : "default"
+                      }
+                    >
+                      {service.availableQuota === -1
+                        ? "Unlimited"
+                        : service.availableQuota === 0
+                        ? "Out of Quota"
+                        : service.availableQuota}
+                    </Badge>
                   </TableCell>
                   <TableCell>
                     <code className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">

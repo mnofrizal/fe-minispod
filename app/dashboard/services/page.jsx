@@ -48,7 +48,7 @@ export default function ServicesPage() {
         const response = await fetch(
           `${
             process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"
-          }/api/v1/services`,
+          }/api/v1/services/grouped`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -59,8 +59,30 @@ export default function ServicesPage() {
         const data = await response.json();
 
         if (response.ok && data.success) {
-          setServices(data.data);
-          setFilteredServices(data.data);
+          // Keep services grouped with their variants
+          const groupedServices = data.data.services.map((service) => {
+            // Find the default variant or the first one for display
+            const defaultVariant =
+              service.variants.find((v) => v.isDefault) || service.variants[0];
+
+            return {
+              ...service,
+              // Remove variant name from displayName for card title
+              displayName: service.displayName.replace(
+                / - (Basic|Plus|Pro|Free)$/,
+                ""
+              ),
+              // Add default variant info for display on card
+              defaultVariant,
+              monthlyPrice: defaultVariant.monthlyPrice,
+              version: defaultVariant.variantDisplayName,
+              // Keep all variants for selection in dialog
+              variants: service.variants,
+            };
+          });
+
+          setServices(groupedServices);
+          setFilteredServices(groupedServices);
         } else {
           setError(data.message || "Failed to fetch services");
         }
@@ -227,7 +249,7 @@ export default function ServicesPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredServices.map((service) => (
-              <ServiceCard key={service.id} service={service} />
+              <ServiceCard key={service.name} service={service} />
             ))}
           </div>
         )}

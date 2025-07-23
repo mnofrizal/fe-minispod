@@ -353,6 +353,49 @@ export default function BillingPage() {
     }
   };
 
+  // Handle download invoice
+  const handleDownloadInvoice = async (invoiceId) => {
+    if (!session?.accessToken || !invoiceId) return;
+
+    try {
+      const response = await fetch(
+        `${
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"
+        }/api/v1/billing/invoices/${invoiceId}/pdf`,
+        {
+          headers: {
+            Authorization: `Bearer ${session.accessToken}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        // Get the blob data
+        const blob = await response.blob();
+
+        // Create a temporary URL for the blob
+        const url = window.URL.createObjectURL(blob);
+
+        // Create a temporary anchor element and trigger download
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `invoice-${invoiceId}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+
+        // Clean up
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } else {
+        const data = await response.json();
+        setError(data.message || "Failed to download invoice");
+      }
+    } catch (err) {
+      setError("An error occurred while downloading invoice");
+      console.error("Error downloading invoice:", err);
+    }
+  };
+
   // Handle pagination
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= pagination.totalPages) {
@@ -600,7 +643,14 @@ export default function BillingPage() {
                             </Button>
                           )}
                           {item.actions?.canDownloadInvoice && (
-                            <Button variant="ghost" size="sm">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() =>
+                                handleDownloadInvoice(item.invoice?.id)
+                              }
+                              title="Download Invoice"
+                            >
                               <Download className="h-4 w-4" />
                             </Button>
                           )}
