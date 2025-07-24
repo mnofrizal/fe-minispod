@@ -33,12 +33,15 @@ export default function WorkerList() {
 
       try {
         setLoading(true);
-        const response = await fetch("http://localhost:3000/api/v1/workers", {
-          headers: {
-            Authorization: `Bearer ${session.accessToken}`,
-            "Content-Type": "application/json",
-          },
-        });
+        const response = await fetch(
+          "http://localhost:3000/api/v1/admin/workers",
+          {
+            headers: {
+              Authorization: `Bearer ${session.accessToken}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
         const data = await response.json();
 

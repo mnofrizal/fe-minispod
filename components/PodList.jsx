@@ -62,16 +62,13 @@ export default function PodList() {
     setError(null);
 
     try {
-      const response = await fetch(
-        "http://localhost:3000/api/v1/pods/admin/all",
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${session.accessToken}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await fetch("http://localhost:3000/api/v1/admin/pods", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${session.accessToken}`,
+          "Content-Type": "application/json",
+        },
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -102,7 +99,7 @@ export default function PodList() {
 
     try {
       const response = await fetch(
-        "http://localhost:3000/api/v1/pods/admin/orphaned",
+        "http://localhost:3000/api/v1/admin/pods/orphaned",
         {
           method: "GET",
           headers: {
