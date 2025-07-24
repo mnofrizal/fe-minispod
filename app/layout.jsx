@@ -14,19 +14,22 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "MinisPod Dashboard",
-  description: "A dashboard application for managing services and users",
+  title: "MinisPod - Simple Service Deployment Platform",
+  description:
+    "Deploy and manage your applications with ease. Simple, powerful, and reliable service deployment platform.",
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" className="scroll-smooth">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100`}
       >
         <Providers>
-          <Navbar />
-          {children}
+          <div className="min-h-screen flex flex-col">
+            <Navbar />
+            <main className="flex-1">{children}</main>
+          </div>
         </Providers>
       </body>
     </html>
