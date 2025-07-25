@@ -120,7 +120,7 @@ export default function Navbar() {
                     >
                       <Avatar className="h-7 w-7">
                         <AvatarImage src="" alt={session.user.name} />
-                        <AvatarFallback className="bg-gray-900 text-white text-xs">
+                        <AvatarFallback className="bg-gray-900 text-white text-xs font-black">
                           {session.user.name
                             ?.split(" ")
                             .map((n) => n[0])
@@ -169,16 +169,11 @@ export default function Navbar() {
             ) : (
               <div className="flex items-center space-x-3">
                 <Link href="/auth/login">
-                  <Button variant="ghost" size="sm">
-                    Sign In
-                  </Button>
-                </Link>
-                <Link href="/auth/register">
                   <Button
                     size="sm"
-                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                    className="bg-black  text-white px-6 text-md cursor-pointer rounded-full font-bold"
                   >
-                    Get Started
+                    Log In
                   </Button>
                 </Link>
               </div>

@@ -19,26 +19,36 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Download, RefreshCw, DollarSign } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Download,
+  RefreshCw,
+  DollarSign,
+  CreditCard,
+  ShoppingCart,
+} from "lucide-react";
 
 export default function TransactionList() {
   const { data: session } = useSession();
-  const [transactions, setTransactions] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [paymentTransactions, setPaymentTransactions] = useState([]);
+  const [subscriptionTransactions, setSubscriptionTransactions] = useState([]);
+  const [paymentLoading, setPaymentLoading] = useState(true);
+  const [subscriptionLoading, setSubscriptionLoading] = useState(true);
+  const [paymentError, setPaymentError] = useState("");
+  const [subscriptionError, setSubscriptionError] = useState("");
 
   useEffect(() => {
-    const fetchTransactions = async () => {
+    const fetchPaymentTransactions = async () => {
       if (!session?.accessToken) return;
 
       try {
-        setLoading(true);
-        setError("");
+        setPaymentLoading(true);
+        setPaymentError("");
 
         const response = await fetch(
           `${
             process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"
-          }/api/v1/admin/billing/transactions`,
+          }/api/v1/admin/billing/transactions?type=TOPUP`,
           {
             headers: {
               Authorization: `Bearer ${session.accessToken}`,
@@ -47,26 +57,78 @@ export default function TransactionList() {
           }
         );
 
+        const data = await response.json();
+
         if (!response.ok) {
-          throw new Error("Failed to fetch transactions");
+          setPaymentError(
+            data.message || "Failed to fetch payment transactions"
+          );
+          return;
         }
 
-        const data = await response.json();
         if (data.success) {
-          setTransactions(data.data.transactions || []);
+          setPaymentTransactions(data.data.transactions || []);
         } else {
-          setError(data.message || "Failed to fetch transactions");
+          setPaymentError(
+            data.message || "Failed to fetch payment transactions"
+          );
         }
       } catch (err) {
-        setError(
-          err.message || "An error occurred while fetching transactions"
+        setPaymentError(
+          err.message || "An error occurred while fetching payment transactions"
         );
       } finally {
-        setLoading(false);
+        setPaymentLoading(false);
       }
     };
 
-    fetchTransactions();
+    const fetchSubscriptionTransactions = async () => {
+      if (!session?.accessToken) return;
+
+      try {
+        setSubscriptionLoading(true);
+        setSubscriptionError("");
+
+        const response = await fetch(
+          `${
+            process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"
+          }/api/v1/admin/billing/transactions?type=SERVICE_PURCHASE`,
+          {
+            headers: {
+              Authorization: `Bearer ${session.accessToken}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          setSubscriptionError(
+            data.message || "Failed to fetch subscription transactions"
+          );
+          return;
+        }
+
+        if (data.success) {
+          setSubscriptionTransactions(data.data.transactions || []);
+        } else {
+          setSubscriptionError(
+            data.message || "Failed to fetch subscription transactions"
+          );
+        }
+      } catch (err) {
+        setSubscriptionError(
+          err.message ||
+            "An error occurred while fetching subscription transactions"
+        );
+      } finally {
+        setSubscriptionLoading(false);
+      }
+    };
+
+    fetchPaymentTransactions();
+    fetchSubscriptionTransactions();
   }, [session]);
 
   const getStatusColor = (status) => {
@@ -129,21 +191,166 @@ export default function TransactionList() {
     console.log("Process refund for transaction:", transactionId);
   };
 
-  if (loading) {
+  const renderTransactionTable = (transactions, loading, error, type) => {
+    if (loading) {
+      return (
+        <div className="flex items-center justify-center h-32">
+          <RefreshCw className="h-8 w-8 animate-spin text-gray-400" />
+        </div>
+      );
+    }
+
+    if (error) {
+      return (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+          {error}
+        </div>
+      );
+    }
+
+    if (transactions.length === 0) {
+      return (
+        <div className="text-center py-8">
+          {type === "payment" ? (
+            <CreditCard className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+          ) : (
+            <ShoppingCart className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+          )}
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            No {type} transactions found
+          </h3>
+          <p className="text-gray-500">
+            No {type} transactions have been processed yet.
+          </p>
+        </div>
+      );
+    }
+
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Transaction Management</CardTitle>
-          <CardDescription>Loading transactions...</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-center h-32">
-            <RefreshCw className="h-8 w-8 animate-spin text-gray-400" />
-          </div>
-        </CardContent>
-      </Card>
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Date</TableHead>
+              <TableHead>User</TableHead>
+              <TableHead>Description</TableHead>
+              <TableHead>Amount</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Reference</TableHead>
+              <TableHead>Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {transactions.map((transaction) => (
+              <TableRow key={transaction.id}>
+                <TableCell className="font-mono text-sm">
+                  {transaction.date ? formatDate(transaction.date) : "No date"}
+                </TableCell>
+                <TableCell>
+                  <div>
+                    <p className="font-medium text-sm">
+                      {transaction.user?.name || "Unknown User"}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {transaction.user?.email || "No email"}
+                    </p>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="max-w-xs">
+                    <p className="text-sm font-medium truncate">
+                      {transaction.description || "No description"}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {transaction.paymentGateway && (
+                        <span className="mr-2">
+                          via {transaction.paymentGateway}
+                        </span>
+                      )}
+                      {transaction.type?.replace("_", " ") || "Unknown type"}
+                    </p>
+                  </div>
+                </TableCell>
+                <TableCell className="font-semibold">
+                  {formatAmount(transaction.amount, transaction.currency)}
+                </TableCell>
+                <TableCell>
+                  <Badge
+                    variant="secondary"
+                    className={`text-white text-xs ${getStatusColor(
+                      transaction.status
+                    )}`}
+                  >
+                    {getStatusText(transaction.status)}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <div className="text-sm">
+                    {transaction.reference ? (
+                      <p className="font-mono text-xs">
+                        {transaction.reference}
+                      </p>
+                    ) : (
+                      <span className="text-xs text-gray-400">
+                        No reference
+                      </span>
+                    )}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    {transaction.actions?.canDownloadInvoice && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleDownloadInvoice(transaction.id)}
+                        className="h-8 w-8 p-0"
+                      >
+                        <Download className="h-4 w-4" />
+                      </Button>
+                    )}
+                    {transaction.actions?.canRefund && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleRefund(transaction.id)}
+                        className="h-8 px-3 text-xs"
+                      >
+                        Refund
+                      </Button>
+                    )}
+                    {transaction.actions?.canPay && (
+                      <Button
+                        size="sm"
+                        variant="default"
+                        onClick={() => console.log("Pay now:", transaction.id)}
+                        className="h-8 px-3 text-xs"
+                      >
+                        Pay Now
+                      </Button>
+                    )}
+                    {transaction.actions?.canCancel && (
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => console.log("Cancel:", transaction.id)}
+                        className="h-8 px-3 text-xs"
+                      >
+                        Cancel
+                      </Button>
+                    )}
+                    {!transaction.actions && (
+                      <span className="text-xs text-gray-400">No actions</span>
+                    )}
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     );
-  }
+  };
 
   return (
     <Card>
@@ -157,133 +364,67 @@ export default function TransactionList() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
-            {error}
-          </div>
-        )}
+        <Tabs defaultValue="payments" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="payments" className="flex items-center gap-2">
+              <CreditCard className="h-4 w-4" />
+              Payment Transactions
+              {paymentTransactions.length > 0 && (
+                <Badge variant="secondary" className="ml-1">
+                  {paymentTransactions.length}
+                </Badge>
+              )}
+            </TabsTrigger>
+            <TabsTrigger
+              value="subscriptions"
+              className="flex items-center gap-2"
+            >
+              <ShoppingCart className="h-4 w-4" />
+              Subscription Transactions
+              {subscriptionTransactions.length > 0 && (
+                <Badge variant="secondary" className="ml-1">
+                  {subscriptionTransactions.length}
+                </Badge>
+              )}
+            </TabsTrigger>
+          </TabsList>
 
-        {transactions.length === 0 ? (
-          <div className="text-center py-8">
-            <DollarSign className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              No transactions found
-            </h3>
-            <p className="text-gray-500">
-              No transactions have been processed yet.
-            </p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>User</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Invoice</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {transactions.map((transaction) => (
-                  <TableRow key={transaction.id}>
-                    <TableCell className="font-mono text-sm">
-                      {transaction.date
-                        ? formatDate(transaction.date)
-                        : "No date"}
-                    </TableCell>
-                    <TableCell>
-                      <div>
-                        <p className="font-medium text-sm">
-                          {transaction.user?.name || "Unknown User"}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          {transaction.user?.email || "No email"}
-                        </p>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="max-w-xs">
-                        <p className="text-sm font-medium truncate">
-                          {transaction.description || "No description"}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          {transaction.type?.replace("_", " ") ||
-                            "Unknown type"}
-                        </p>
-                      </div>
-                    </TableCell>
-                    <TableCell className="font-semibold">
-                      {formatAmount(transaction.amount, transaction.currency)}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="secondary"
-                        className={`text-white text-xs ${getStatusColor(
-                          transaction.status
-                        )}`}
-                      >
-                        {getStatusText(transaction.status)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-sm">
-                        {transaction.invoice ? (
-                          <>
-                            <p className="font-mono text-xs">
-                              {transaction.invoice.invoiceNumber}
-                            </p>
-                            <Badge variant="outline" className="text-xs mt-1">
-                              {transaction.invoice.status}
-                            </Badge>
-                          </>
-                        ) : (
-                          <span className="text-xs text-gray-400">
-                            No invoice
-                          </span>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        {transaction.actions?.canDownloadInvoice && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() =>
-                              handleDownloadInvoice(transaction.id)
-                            }
-                            className="h-8 w-8 p-0"
-                          >
-                            <Download className="h-4 w-4" />
-                          </Button>
-                        )}
-                        {transaction.actions?.canRefund && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleRefund(transaction.id)}
-                            className="h-8 px-3 text-xs"
-                          >
-                            Refund
-                          </Button>
-                        )}
-                        {!transaction.actions && (
-                          <span className="text-xs text-gray-400">
-                            No actions
-                          </span>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        )}
+          <TabsContent value="payments" className="mt-6">
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-lg font-semibold">Payment Transactions</h3>
+                <p className="text-sm text-gray-600">
+                  Top-up and payment gateway transactions
+                </p>
+              </div>
+              {renderTransactionTable(
+                paymentTransactions,
+                paymentLoading,
+                paymentError,
+                "payment"
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="subscriptions" className="mt-6">
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-lg font-semibold">
+                  Subscription Transactions
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Service subscription and billing transactions
+                </p>
+              </div>
+              {renderTransactionTable(
+                subscriptionTransactions,
+                subscriptionLoading,
+                subscriptionError,
+                "subscription"
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
       </CardContent>
     </Card>
   );

@@ -42,11 +42,14 @@ export default function UserDashboard() {
           }
         );
 
+        const data = await response.json();
+
         if (!response.ok) {
-          throw new Error("Failed to fetch subscriptions");
+          // Use the specific error message from the API response
+          setError(data.message || "Failed to fetch subscriptions");
+          return;
         }
 
-        const data = await response.json();
         if (data.success) {
           setSubscriptions(data.data.subscriptions || []);
         } else {

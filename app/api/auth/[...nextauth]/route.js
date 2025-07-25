@@ -11,7 +11,7 @@ const handler = NextAuth({
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          return null;
+          throw new Error("Email and password are required");
         }
 
         try {
@@ -39,10 +39,24 @@ const handler = NextAuth({
               refreshToken: data.data.tokens.refreshToken,
             };
           }
-          return null;
+
+          // Throw error with full response data for better error handling
+          throw new Error(JSON.stringify(data));
         } catch (error) {
           console.error("Auth error:", error);
-          return null;
+          // If it's already a structured error, re-throw it
+          if (error.message.startsWith("{")) {
+            throw error;
+          }
+          // Otherwise, create a generic error structure
+          throw new Error(
+            JSON.stringify({
+              success: false,
+              message:
+                error.message || "An error occurred during authentication",
+              code: "AUTH_ERROR",
+            })
+          );
         }
       },
     }),
@@ -55,57 +69,9 @@ const handler = NextAuth({
         token.role = user.role;
         token.isActive = user.isActive;
       }
-
-      // Validate token against database on each request
-      if (token.accessToken) {
-        try {
-          const res = await fetch("http://localhost:3000/api/v1/auth/me", {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token.accessToken}`,
-              "Content-Type": "application/json",
-            },
-          });
-
-          if (!res.ok) {
-            // Token is invalid, mark as invalid
-            token.isValid = false;
-            return token;
-          }
-
-          const data = await res.json();
-          if (!data.success || !data.data) {
-            // User doesn't exist in database, mark as invalid
-            token.isValid = false;
-            return token;
-          }
-
-          // Check if user is inactive
-          if (!data.data.isActive) {
-            // User is inactive, mark as invalid
-            token.isValid = false;
-            return token;
-          }
-
-          // Update token with fresh user data and mark as valid
-          token.role = data.data.role;
-          token.isActive = data.data.isActive;
-          token.isValid = true;
-        } catch (error) {
-          console.error("Token validation error:", error);
-          // On error, mark as invalid
-          token.isValid = false;
-        }
-      }
-
       return token;
     },
     async session({ session, token }) {
-      // If token is invalid, return null session
-      if (!token || token.isValid === false) {
-        return null;
-      }
-
       session.accessToken = token.accessToken;
       session.refreshToken = token.refreshToken;
       session.user.role = token.role;

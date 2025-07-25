@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import ServiceCard from "@/components/ServiceCard";
 import {
   Card,
@@ -25,24 +24,22 @@ import {
 
 export default function ServicesPage() {
   const { data: session, status } = useSession();
-  const router = useRouter();
   const [services, setServices] = useState([]);
   const [filteredServices, setFilteredServices] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [priceFilter, setPriceFilter] = useState("all");
 
-  useEffect(() => {
-    if (status === "loading") return;
-    if (!session) {
-      router.push("/auth/login");
-      return;
-    }
-  }, [session, status, router]);
+  // Remove the redirect useEffect - let middleware handle authentication
 
   useEffect(() => {
     const fetchServices = async () => {
+      if (!session?.accessToken) {
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
         const response = await fetch(
@@ -52,6 +49,7 @@ export default function ServicesPage() {
           {
             headers: {
               "Content-Type": "application/json",
+              Authorization: `Bearer ${session.accessToken}`,
             },
           }
         );
@@ -84,6 +82,7 @@ export default function ServicesPage() {
           setServices(groupedServices);
           setFilteredServices(groupedServices);
         } else {
+          // Use the specific error message from the API response
           setError(data.message || "Failed to fetch services");
         }
       } catch (err) {
@@ -94,8 +93,10 @@ export default function ServicesPage() {
       }
     };
 
-    fetchServices();
-  }, []);
+    if (session?.accessToken) {
+      fetchServices();
+    }
+  }, [session?.accessToken]);
 
   // Filter services based on search term and filters
   useEffect(() => {
@@ -126,7 +127,7 @@ export default function ServicesPage() {
     setFilteredServices(filtered);
   }, [services, searchTerm, priceFilter]);
 
-  if (status === "loading" || loading) {
+  if (status === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-lg">Loading...</div>
@@ -134,6 +135,7 @@ export default function ServicesPage() {
     );
   }
 
+  // Let middleware handle authentication redirect
   if (!session) {
     return null;
   }
@@ -203,7 +205,14 @@ export default function ServicesPage() {
             <div className="flex items-center justify-between mt-4 pt-4 border-t">
               <div className="flex items-center gap-2">
                 <Badge variant="outline">
-                  {filteredServices.length} of {services.length} services
+                  {loading ? (
+                    <div className="flex items-center gap-1">
+                      <div className="animate-spin rounded-full h-3 w-3 border-b border-gray-600"></div>
+                      Loading...
+                    </div>
+                  ) : (
+                    `${filteredServices.length} of ${services.length} services`
+                  )}
                 </Badge>
                 {searchTerm && (
                   <Badge variant="secondary">Search: "{searchTerm}"</Badge>
@@ -230,7 +239,18 @@ export default function ServicesPage() {
         </Card>
 
         {/* Services Grid */}
-        {filteredServices.length === 0 ? (
+        {loading ? (
+          <Card>
+            <CardContent className="py-12">
+              <div className="text-center">
+                <div className="flex items-center justify-center space-x-2">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
+                  <span>Loading services...</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ) : filteredServices.length === 0 ? (
           <Card>
             <CardContent className="py-12">
               <div className="text-center">

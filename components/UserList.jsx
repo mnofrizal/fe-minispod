@@ -29,6 +29,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -38,7 +45,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Search, Trash2, UserCheck, UserX } from "lucide-react";
+import { Plus, Search, Trash2, UserCheck, UserX, Eye } from "lucide-react";
 import { toast } from "sonner";
 
 export default function UserList() {
@@ -607,54 +614,108 @@ export default function UserList() {
                 </TableRow>
               ) : (
                 filteredUsers.map((user) => (
-                  <TableRow
-                    key={user.id}
-                    className="cursor-pointer hover:bg-muted/50"
-                    onClick={() => handleRowClick(user.id)}
-                  >
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-8 w-8">
-                          <AvatarImage src="" alt={user.name} />
-                          <AvatarFallback className="text-xs">
-                            {user.name
-                              .split(" ")
-                              .map((n) => n[0])
-                              .join("")}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <div className="font-medium">{user.name}</div>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>
-                      <Badge variant={getRoleBadgeVariant(user.role)}>
-                        {user.role}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <div
-                          className={`w-2 h-2 rounded-full ${
-                            user.isActive ? "bg-green-500" : "bg-red-500"
-                          }`}
-                        ></div>
-                        <span className="text-sm">
-                          {user.isActive ? "Active" : "Inactive"}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline">
-                        {user._count.subscriptions}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-sm text-gray-500">
-                      {formatDate(user.createdAt)}
-                    </TableCell>
-                  </TableRow>
+                  <ContextMenu key={user.id}>
+                    <ContextMenuTrigger asChild>
+                      <TableRow
+                        className="cursor-pointer hover:bg-muted/50"
+                        onClick={() => handleRowClick(user.id)}
+                      >
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-8 w-8">
+                              <AvatarImage src="" alt={user.name} />
+                              <AvatarFallback className="text-xs">
+                                {user.name
+                                  .split(" ")
+                                  .map((n) => n[0])
+                                  .join("")}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <div className="font-medium">{user.name}</div>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>{user.email}</TableCell>
+                        <TableCell>
+                          <Badge variant={getRoleBadgeVariant(user.role)}>
+                            {user.role}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <div
+                              className={`w-2 h-2 rounded-full ${
+                                user.isActive ? "bg-green-500" : "bg-red-500"
+                              }`}
+                            ></div>
+                            <span className="text-sm">
+                              {user.isActive ? "Active" : "Inactive"}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">
+                            {user._count.subscriptions}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-sm text-gray-500">
+                          {formatDate(user.createdAt)}
+                        </TableCell>
+                      </TableRow>
+                    </ContextMenuTrigger>
+                    <ContextMenuContent className="w-48">
+                      <ContextMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRowClick(user.id);
+                        }}
+                        className="cursor-pointer"
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        View Details
+                      </ContextMenuItem>
+                      <ContextMenuSeparator />
+                      <ContextMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // Set selected user and toggle status
+                          setSelectedUser(user);
+                          setTimeout(() => {
+                            handleToggleStatus();
+                          }, 100);
+                        }}
+                        className="cursor-pointer"
+                      >
+                        {user.isActive ? (
+                          <>
+                            <UserX className="h-4 w-4 mr-2" />
+                            Deactivate User
+                          </>
+                        ) : (
+                          <>
+                            <UserCheck className="h-4 w-4 mr-2" />
+                            Activate User
+                          </>
+                        )}
+                      </ContextMenuItem>
+                      <ContextMenuSeparator />
+                      <ContextMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // Set selected user and delete
+                          setSelectedUser(user);
+                          setTimeout(() => {
+                            handleDeleteUser();
+                          }, 100);
+                        }}
+                        className="cursor-pointer text-red-600 focus:text-red-600"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete User
+                      </ContextMenuItem>
+                    </ContextMenuContent>
+                  </ContextMenu>
                 ))
               )}
             </TableBody>
