@@ -25,7 +25,7 @@ export default function Home() {
           <h1 className="text-6xl sm:text-7xl lg:text-8xl font-bold text-black mb-8 tracking-tight leading-none">
             Super fast deployment
             <br />
-            for every team
+            for everyone
           </h1>
 
           {/* CTA Button */}

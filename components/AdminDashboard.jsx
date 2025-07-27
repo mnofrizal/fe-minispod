@@ -17,6 +17,7 @@ import ServiceList from "@/components/ServiceList";
 import WorkerList from "@/components/WorkerList";
 import PodList from "@/components/PodList";
 import TransactionList from "@/components/TransactionList";
+import SubscriptionList from "@/components/SubscriptionList";
 
 export default function AdminDashboard() {
   const { data: session } = useSession();
@@ -99,9 +100,12 @@ export default function AdminDashboard() {
 
         {/* Admin Management Tabs */}
         <Tabs defaultValue="users" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="users">User Management</TabsTrigger>
             <TabsTrigger value="services">Service Management</TabsTrigger>
+            <TabsTrigger value="subscriptions">
+              Subscription Management
+            </TabsTrigger>
             <TabsTrigger value="pods">Pod Management</TabsTrigger>
             <TabsTrigger value="workers">Worker Nodes</TabsTrigger>
             <TabsTrigger value="transactions">
@@ -115,6 +119,10 @@ export default function AdminDashboard() {
 
           <TabsContent value="services" className="mt-6">
             <ServiceList />
+          </TabsContent>
+
+          <TabsContent value="subscriptions" className="mt-6">
+            <SubscriptionList />
           </TabsContent>
 
           <TabsContent value="pods" className="mt-6">
