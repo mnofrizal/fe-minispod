@@ -157,13 +157,96 @@ export default function PodList() {
     setDeleteSuccess(false);
 
     try {
-      const deployments = selectedOrphanedPods.map((pod) => ({
-        deploymentName: pod.deploymentName,
-        namespace: pod.namespace,
-      }));
+      let successCount = 0;
+      let errorCount = 0;
+      const errors = [];
+
+      // Delete each selected pod individually using the correct API endpoint
+      for (const pod of selectedOrphanedPods) {
+        try {
+          const response = await fetch(
+            `http://localhost:3000/api/v1/admin/pods/orphaned/${pod.deploymentName}/${pod.namespace}`,
+            {
+              method: "DELETE",
+              headers: {
+                Authorization: `Bearer ${session.accessToken}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                confirm: true,
+              }),
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const data = await response.json();
+
+          if (data.success) {
+            successCount++;
+          } else {
+            errorCount++;
+            errors.push(
+              `${pod.deploymentName}: ${data.message || "Unknown error"}`
+            );
+          }
+        } catch (err) {
+          errorCount++;
+          errors.push(`${pod.deploymentName}: ${err.message}`);
+        }
+      }
+
+      // Show results
+      if (successCount > 0) {
+        setDeleteSuccess(true);
+        toast.success(`Successfully deleted ${successCount} orphaned pod(s).`);
+      }
+
+      if (errorCount > 0) {
+        const errorMessage = `Failed to delete ${errorCount} pod(s): ${errors.join(
+          ", "
+        )}`;
+        setDeleteError(errorMessage);
+        toast.error(errorMessage, {
+          style: {
+            background: "#fee2e2",
+            border: "1px solid #fecaca",
+            color: "#dc2626",
+          },
+        });
+      }
+
+      // Reset selection and refresh list
+      setSelectedOrphanedPods([]);
+      fetchOrphanedPods();
+    } catch (err) {
+      console.error("Error deleting orphaned pods:", err);
+      setDeleteError(err.message);
+    } finally {
+      setDeletingPods(false);
+    }
+  };
+
+  // Delete single orphaned pod
+  const deleteSingleOrphanedPod = async (deploymentName, namespace) => {
+    if (!session?.accessToken) return;
+
+    if (
+      !confirm(
+        `Are you sure you want to delete the orphaned pod "${deploymentName}" in namespace "${namespace}"? This action cannot be undone.`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      setDeletingPods(true);
+      setDeleteError(null);
 
       const response = await fetch(
-        "http://localhost:3000/api/v1/pods/admin/orphaned",
+        `http://localhost:3000/api/v1/admin/pods/orphaned/${deploymentName}/${namespace}`,
         {
           method: "DELETE",
           headers: {
@@ -172,7 +255,6 @@ export default function PodList() {
           },
           body: JSON.stringify({
             confirm: true,
-            deployments: deployments,
           }),
         }
       );
@@ -184,15 +266,20 @@ export default function PodList() {
       const data = await response.json();
 
       if (data.success) {
-        setDeleteSuccess(true);
-        setSelectedOrphanedPods([]);
-        fetchOrphanedPods();
+        toast.success(`Orphaned pod "${deploymentName}" deleted successfully.`);
+        fetchOrphanedPods(); // Refresh the orphaned pods list
       } else {
-        throw new Error(data.message || "Failed to delete orphaned pods");
+        throw new Error(data.message || "Failed to delete orphaned pod");
       }
     } catch (err) {
-      console.error("Error deleting orphaned pods:", err);
-      setDeleteError(err.message);
+      console.error("Error deleting orphaned pod:", err);
+      toast.error(`Failed to delete orphaned pod: ${err.message}`, {
+        style: {
+          background: "#fee2e2",
+          border: "1px solid #fecaca",
+          color: "#dc2626",
+        },
+      });
     } finally {
       setDeletingPods(false);
     }
@@ -663,133 +750,157 @@ export default function PodList() {
                                       p.namespace === pod.namespace
                                   );
                                   return (
-                                    <TableRow
-                                      key={index}
-                                      className={
-                                        isSelected
-                                          ? "bg-blue-50 dark:bg-blue-900/20"
-                                          : ""
-                                      }
-                                    >
-                                      <TableCell>
-                                        <Checkbox
-                                          checked={isSelected}
-                                          onCheckedChange={(checked) =>
-                                            handleSelectOrphanedPod(
-                                              pod,
-                                              checked
-                                            )
+                                    <ContextMenu key={index}>
+                                      <ContextMenuTrigger asChild>
+                                        <TableRow
+                                          className={
+                                            isSelected
+                                              ? "bg-blue-50 dark:bg-blue-900/20 cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/30"
+                                              : "cursor-pointer hover:bg-muted/50"
                                           }
-                                        />
-                                      </TableCell>
-                                      <TableCell>
-                                        <div>
-                                          <p className="font-medium">
-                                            {pod.deploymentName}
-                                          </p>
-                                          <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                                            {pod.pods?.map((p, i) => (
-                                              <div
-                                                key={i}
-                                                className="flex items-center gap-1"
-                                              >
-                                                <div
-                                                  className={`w-2 h-2 rounded-full ${
-                                                    p.phase === "Running"
-                                                      ? "bg-green-500"
-                                                      : "bg-red-500"
-                                                  }`}
-                                                ></div>
-                                                <span>{p.name}</span>
-                                              </div>
-                                            ))}
-                                          </div>
-                                        </div>
-                                      </TableCell>
-                                      <TableCell>
-                                        <Badge variant="outline">
-                                          {pod.namespace}
-                                        </Badge>
-                                      </TableCell>
-                                      <TableCell>
-                                        <Badge variant="secondary">
-                                          {pod.labels?.service || "N/A"}
-                                        </Badge>
-                                      </TableCell>
-                                      <TableCell>
-                                        <div className="text-center">
-                                          <span className="font-medium">
-                                            {pod.readyReplicas}/{pod.replicas}
-                                          </span>
-                                        </div>
-                                      </TableCell>
-                                      <TableCell>
-                                        {pod.workerNodesSummary &&
-                                        pod.workerNodesSummary.length > 0 ? (
-                                          <div className="text-sm">
-                                            {pod.workerNodesSummary.map(
-                                              (nodeName, idx) => {
-                                                const workerNode =
-                                                  pod.pods?.find(
-                                                    (p) =>
-                                                      p.workerNode?.nodeName ===
-                                                      nodeName
-                                                  )?.workerNode;
-                                                return (
-                                                  <div
-                                                    key={idx}
-                                                    className="mb-1 last:mb-0"
-                                                  >
-                                                    <p className="font-medium">
-                                                      {nodeName}
-                                                    </p>
-                                                    {workerNode && (
-                                                      <>
-                                                        <p className="text-xs text-gray-600 dark:text-gray-400">
-                                                          {workerNode.nodeIP}
-                                                        </p>
-                                                        <div className="flex items-center gap-1">
-                                                          <div
-                                                            className={`w-2 h-2 rounded-full ${
-                                                              workerNode.ready
-                                                                ? "bg-green-500"
-                                                                : "bg-red-500"
-                                                            }`}
-                                                          ></div>
-                                                          <span className="text-xs text-gray-600 dark:text-gray-400">
-                                                            {
-                                                              workerNode.architecture
-                                                            }
-                                                          </span>
-                                                        </div>
-                                                      </>
-                                                    )}
-                                                  </div>
-                                                );
-                                              }
-                                            )}
-                                          </div>
-                                        ) : (
-                                          <span className="text-xs text-gray-400">
-                                            N/A
-                                          </span>
-                                        )}
-                                      </TableCell>
-                                      <TableCell>
-                                        <div className="flex items-center gap-1 text-sm">
-                                          <Calendar className="h-3 w-3" />
-                                          {formatDate(pod.createdAt)}
-                                        </div>
-                                      </TableCell>
-                                      <TableCell>
-                                        <Badge
-                                          variant="destructive"
-                                          className="text-xs"
                                         >
-                                          {pod.reason}
-                                        </Badge>
-                                      </TableCell>
-                                    </TableRow>
+                                          <TableCell>
+                                            <Checkbox
+                                              checked={isSelected}
+                                              onCheckedChange={(checked) =>
+                                                handleSelectOrphanedPod(
+                                                  pod,
+                                                  checked
+                                                )
+                                              }
+                                            />
+                                          </TableCell>
+                                          <TableCell>
+                                            <div>
+                                              <p className="font-medium">
+                                                {pod.deploymentName}
+                                              </p>
+                                              <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                                                {pod.pods?.map((p, i) => (
+                                                  <div
+                                                    key={i}
+                                                    className="flex items-center gap-1"
+                                                  >
+                                                    <div
+                                                      className={`w-2 h-2 rounded-full ${
+                                                        p.phase === "Running"
+                                                          ? "bg-green-500"
+                                                          : "bg-red-500"
+                                                      }`}
+                                                    ></div>
+                                                    <span>{p.name}</span>
+                                                  </div>
+                                                ))}
+                                              </div>
+                                            </div>
+                                          </TableCell>
+                                          <TableCell>
+                                            <Badge variant="outline">
+                                              {pod.namespace}
+                                            </Badge>
+                                          </TableCell>
+                                          <TableCell>
+                                            <Badge variant="secondary">
+                                              {pod.labels?.service || "N/A"}
+                                            </Badge>
+                                          </TableCell>
+                                          <TableCell>
+                                            <div className="text-center">
+                                              <span className="font-medium">
+                                                {pod.readyReplicas}/
+                                                {pod.replicas}
+                                              </span>
+                                            </div>
+                                          </TableCell>
+                                          <TableCell>
+                                            {pod.workerNodesSummary &&
+                                            pod.workerNodesSummary.length >
+                                              0 ? (
+                                              <div className="text-sm">
+                                                {pod.workerNodesSummary.map(
+                                                  (nodeName, idx) => {
+                                                    const workerNode =
+                                                      pod.pods?.find(
+                                                        (p) =>
+                                                          p.workerNode
+                                                            ?.nodeName ===
+                                                          nodeName
+                                                      )?.workerNode;
+                                                    return (
+                                                      <div
+                                                        key={idx}
+                                                        className="mb-1 last:mb-0"
+                                                      >
+                                                        <p className="font-medium">
+                                                          {nodeName}
+                                                        </p>
+                                                        {workerNode && (
+                                                          <>
+                                                            <p className="text-xs text-gray-600 dark:text-gray-400">
+                                                              {
+                                                                workerNode.nodeIP
+                                                              }
+                                                            </p>
+                                                            <div className="flex items-center gap-1">
+                                                              <div
+                                                                className={`w-2 h-2 rounded-full ${
+                                                                  workerNode.ready
+                                                                    ? "bg-green-500"
+                                                                    : "bg-red-500"
+                                                                }`}
+                                                              ></div>
+                                                              <span className="text-xs text-gray-600 dark:text-gray-400">
+                                                                {
+                                                                  workerNode.architecture
+                                                                }
+                                                              </span>
+                                                            </div>
+                                                          </>
+                                                        )}
+                                                      </div>
+                                                    );
+                                                  }
+                                                )}
+                                              </div>
+                                            ) : (
+                                              <span className="text-xs text-gray-400">
+                                                N/A
+                                              </span>
+                                            )}
+                                          </TableCell>
+                                          <TableCell>
+                                            <div className="flex items-center gap-1 text-sm">
+                                              <Calendar className="h-3 w-3" />
+                                              {formatDate(pod.createdAt)}
+                                            </div>
+                                          </TableCell>
+                                          <TableCell>
+                                            <Badge
+                                              variant="destructive"
+                                              className="text-xs"
+                                            >
+                                              {pod.reason}
+                                            </Badge>
+                                          </TableCell>
+                                        </TableRow>
+                                      </ContextMenuTrigger>
+                                      <ContextMenuContent className="w-48">
+                                        <ContextMenuItem
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            deleteSingleOrphanedPod(
+                                              pod.deploymentName,
+                                              pod.namespace
+                                            );
+                                          }}
+                                          className="cursor-pointer text-red-600 focus:text-red-600"
+                                          disabled={deletingPods}
+                                        >
+                                          <Trash2 className="h-4 w-4 mr-2" />
+                                          Delete Orphaned Pod
+                                        </ContextMenuItem>
+                                      </ContextMenuContent>
+                                    </ContextMenu>
                                   );
                                 })}
                               </TableBody>
