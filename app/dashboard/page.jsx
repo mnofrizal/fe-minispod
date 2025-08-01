@@ -24,22 +24,20 @@ export default function Dashboard() {
   if (isAdmin) {
     return (
       <DashboardLayout>
-        <div className="max-w-6xl mx-auto">
-          <Tabs defaultValue="admin" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 max-w-md mb-6">
-              <TabsTrigger value="user">As User</TabsTrigger>
-              <TabsTrigger value="admin">As Admin</TabsTrigger>
-            </TabsList>
+        <Tabs defaultValue="admin" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 max-w-md mb-6">
+            <TabsTrigger value="user">As User</TabsTrigger>
+            <TabsTrigger value="admin">As Admin</TabsTrigger>
+          </TabsList>
 
-            <TabsContent value="user">
-              <UserDashboard />
-            </TabsContent>
+          <TabsContent value="user">
+            <UserDashboard />
+          </TabsContent>
 
-            <TabsContent value="admin">
-              <AdminDashboard />
-            </TabsContent>
-          </Tabs>
-        </div>
+          <TabsContent value="admin">
+            <AdminDashboard />
+          </TabsContent>
+        </Tabs>
       </DashboardLayout>
     );
   } else {

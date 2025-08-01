@@ -122,14 +122,15 @@ export default function DashboardLayout({ children }) {
   const breadcrumbs = getBreadcrumbs();
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-950">
       <SidebarProvider>
         <div className="flex min-h-screen w-full">
           <DashboardSidebar />
           <SidebarInset className="flex-1">
-            <div className="flex flex-col min-h-screen">
+            {/* Main Content Card */}
+            <div className="flex flex-col min-h-full bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800">
               {/* Header with sidebar trigger and breadcrumbs */}
-              <header className="fixed top-0 left-0 md:left-64 right-0 z-[5] flex border-b h-14 shrink-0 items-center gap-2 px-4 bg-white dark:bg-gray-900">
+              <header className="flex h-14 shrink-0 items-center gap-2 px-4 border-b border-gray-200 dark:border-gray-800 rounded-t-xl">
                 <div className="flex items-center gap-2 flex-1">
                   <SidebarTrigger className="-ml-1 border-0 shadow-none" />
                   <Breadcrumb>
@@ -208,9 +209,7 @@ export default function DashboardLayout({ children }) {
                 </DropdownMenu>
               </header>
 
-              <main className="flex-1 bg-white dark:bg-gray-900 pt-14">
-                {children}
-              </main>
+              <main className="flex-1 p-6">{children}</main>
             </div>
           </SidebarInset>
         </div>

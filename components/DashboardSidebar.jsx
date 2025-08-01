@@ -96,7 +96,7 @@ export default function DashboardSidebar() {
   };
 
   return (
-    <Sidebar className="border-r border-gray-200 dark:border-gray-800">
+    <Sidebar variant="inset" className="border-none">
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
