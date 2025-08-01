@@ -15,7 +15,19 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { signOut } from "next-auth/react";
+import Link from "next/link";
 import {
   Home,
   Server,
@@ -24,10 +36,18 @@ import {
   BarChart3,
   Package,
   Shield,
+  User,
+  LogOut,
 } from "lucide-react";
 
 export default function DashboardLayout({ children }) {
   const pathname = usePathname();
+  const { data: session } = useSession();
+  const user = session?.user;
+
+  const handleSignOut = async () => {
+    await signOut({ callbackUrl: "/" });
+  };
 
   // Map routes to breadcrumb data
   const getBreadcrumbs = () => {
@@ -109,41 +129,86 @@ export default function DashboardLayout({ children }) {
           <SidebarInset className="flex-1">
             <div className="flex flex-col min-h-screen">
               {/* Header with sidebar trigger and breadcrumbs */}
-              <header className="flex border-b h-14 shrink-0 items-center gap-2 px-4 bg-white dark:bg-gray-900">
-                <SidebarTrigger className="-ml-1 border-0 shadow-none" />
-                <Breadcrumb>
-                  <BreadcrumbList>
-                    {breadcrumbs.map((breadcrumb, index) => {
-                      const isLast = index === breadcrumbs.length - 1;
+              <header className="fixed top-0 left-0 md:left-64 right-0 z-[5] flex border-b h-14 shrink-0 items-center gap-2 px-4 bg-white dark:bg-gray-900">
+                <div className="flex items-center gap-2 flex-1">
+                  <SidebarTrigger className="-ml-1 border-0 shadow-none" />
+                  <Breadcrumb>
+                    <BreadcrumbList>
+                      {breadcrumbs.map((breadcrumb, index) => {
+                        const isLast = index === breadcrumbs.length - 1;
 
-                      return (
-                        <div
-                          key={breadcrumb.href}
-                          className="flex items-center"
-                        >
-                          <BreadcrumbItem>
-                            {isLast ? (
-                              <BreadcrumbPage>
-                                {breadcrumb.label}
-                              </BreadcrumbPage>
-                            ) : (
-                              <BreadcrumbLink
-                                href={breadcrumb.href}
-                                className="hover:text-gray-900 dark:hover:text-gray-100"
-                              >
-                                {breadcrumb.label}
-                              </BreadcrumbLink>
-                            )}
-                          </BreadcrumbItem>
-                          {!isLast && <BreadcrumbSeparator />}
-                        </div>
-                      );
-                    })}
-                  </BreadcrumbList>
-                </Breadcrumb>
+                        return (
+                          <div
+                            key={breadcrumb.href}
+                            className="flex items-center"
+                          >
+                            <BreadcrumbItem>
+                              {isLast ? (
+                                <BreadcrumbPage>
+                                  {breadcrumb.label}
+                                </BreadcrumbPage>
+                              ) : (
+                                <BreadcrumbLink
+                                  href={breadcrumb.href}
+                                  className="hover:text-gray-900 dark:hover:text-gray-100"
+                                >
+                                  {breadcrumb.label}
+                                </BreadcrumbLink>
+                              )}
+                            </BreadcrumbItem>
+                            {!isLast && <BreadcrumbSeparator />}
+                          </div>
+                        );
+                      })}
+                    </BreadcrumbList>
+                  </Breadcrumb>
+                </div>
+
+                {/* User Avatar Dropdown */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src="" alt={user?.name} />
+                      <AvatarFallback className="text-xs font-semibold">
+                        {user?.name
+                          ?.split(" ")
+                          .map((n) => n[0])
+                          .join("")}
+                      </AvatarFallback>
+                    </Avatar>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuLabel>
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium">{user?.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {user?.email}
+                        </p>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href="/dashboard/profile"
+                        className="flex items-center"
+                      >
+                        <User className="mr-2 h-4 w-4" />
+                        Profile
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={handleSignOut}
+                      className="text-red-600 focus:text-red-600 dark:text-red-400 dark:focus:text-red-400"
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </header>
 
-              <main className="flex-1 bg-white dark:bg-gray-900">
+              <main className="flex-1 bg-white dark:bg-gray-900 pt-14">
                 {children}
               </main>
             </div>

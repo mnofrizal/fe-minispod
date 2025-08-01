@@ -146,7 +146,10 @@ export default function DashboardSidebar() {
                       isActive={pathname === "/dashboard/user-view"}
                       className="w-full justify-start"
                     >
-                      <Link href="/dashboard/user-view" className="flex items-center gap-3">
+                      <Link
+                        href="/dashboard/user-view"
+                        className="flex items-center gap-3"
+                      >
                         <User className="h-4 w-4" />
                         <span>Switch to User View</span>
                       </Link>
@@ -181,7 +184,7 @@ export default function DashboardSidebar() {
               </p>
             </div>
           </div>
-          
+
           {/* Sign Out Button */}
           <Button
             onClick={handleSignOut}
