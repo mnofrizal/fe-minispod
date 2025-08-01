@@ -14,6 +14,7 @@ import {
   Package,
   Shield,
   LogOut,
+  AppWindow,
 } from "lucide-react";
 import {
   Sidebar,
@@ -39,6 +40,11 @@ const userMenuItems = [
     icon: LayoutDashboard,
   },
   {
+    title: "My Apps",
+    url: "/dashboard/my-apps",
+    icon: AppWindow,
+  },
+  {
     title: "Billing",
     url: "/dashboard/billing",
     icon: CreditCard,
@@ -47,7 +53,7 @@ const userMenuItems = [
 
 const userExploreItems = [
   {
-    title: "Services",
+    title: "Apps List",
     url: "/dashboard/services",
     icon: Server,
   },

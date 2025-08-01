@@ -209,7 +209,7 @@ export default function DashboardLayout({ children }) {
                 </DropdownMenu>
               </header>
 
-              <main className="flex-1 overflow-y-auto p-6 px-12">
+              <main className="flex-1 overflow-y-auto p-4 px-8">
                 {children}
               </main>
             </div>
