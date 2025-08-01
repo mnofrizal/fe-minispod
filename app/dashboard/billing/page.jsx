@@ -415,332 +415,330 @@ export default function BillingPage() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-6xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Billing & Balance
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Manage your account balance and transaction history
-          </p>
-        </div>
+      <div className="mb-8">
+        <h1 className="text-3xl font-semibold text-gray-900 dark:text-white">
+          Billing & Balance
+        </h1>
+        <p className="text-gray-600 dark:text-gray-400 text-sm mt-2">
+          Manage your account balance and transaction history
+        </p>
+      </div>
 
-        {/* Balance and Top Up Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {/* Current Balance Card */}
-          <Card className="md:col-span-2">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-gray-600">
-                Current Balance
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                    {balanceLoading ? (
-                      <div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-8 w-32 rounded"></div>
-                    ) : (
-                      formatCurrency(balance)
-                    )}
-                  </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Available for purchases
-                  </p>
-                </div>
-                <Wallet className="h-12 w-12 text-blue-500" />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Top Up Card */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-gray-600">
-                Top Up Balance
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center">
-                <Dialog
-                  open={isTopUpDialogOpen}
-                  onOpenChange={handleDialogOpen}
-                >
-                  <DialogTrigger asChild>
-                    <Button className="w-full" size="lg">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Top Up Balance
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                      <DialogTitle>Top Up Balance</DialogTitle>
-                      <DialogDescription>
-                        Add funds to your account. Minimum top-up amount is Rp
-                        50,000.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4 py-4">
-                      {error && (
-                        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-                          {error}
-                        </div>
-                      )}
-                      <div>
-                        <Input
-                          type="number"
-                          placeholder="Enter amount (minimum Rp 50,000)"
-                          value={topUpAmount}
-                          onChange={(e) => setTopUpAmount(e.target.value)}
-                          className="text-lg"
-                          disabled={topUpLoading}
-                        />
-                      </div>
-
-                      {/* Quick Amount Buttons */}
-                      <div className="grid grid-cols-3 gap-2">
-                        {[100000, 500000, 1000000].map((amount) => (
-                          <Button
-                            key={amount}
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setTopUpAmount(amount.toString())}
-                            disabled={topUpLoading}
-                          >
-                            {formatCurrency(amount)}
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
-                    <DialogFooter>
-                      <Button
-                        variant="outline"
-                        onClick={() => setIsTopUpDialogOpen(false)}
-                        disabled={topUpLoading}
-                      >
-                        Cancel
-                      </Button>
-                      <Button
-                        onClick={handleTopUp}
-                        disabled={
-                          !topUpAmount ||
-                          parseInt(topUpAmount) < 50000 ||
-                          topUpLoading
-                        }
-                      >
-                        {topUpLoading ? (
-                          <>
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                            Processing...
-                          </>
-                        ) : (
-                          <>
-                            <Plus className="h-4 w-4 mr-2" />
-                            Confirm Top Up
-                          </>
-                        )}
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Transaction History */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Transaction History</CardTitle>
-            <CardDescription>
-              View your top-ups and service purchases
-            </CardDescription>
-            <div className="flex items-center space-x-2 mt-4">
-              <div className="relative w-full">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  placeholder="Search transactions..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 w-full"
-                />
-              </div>
-            </div>
+      {/* Balance and Top Up Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        {/* Current Balance Card */}
+        <Card className="md:col-span-2">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-gray-600">
+              Current Balance
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Reference</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {transactionsLoading ? (
-                  <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8">
-                      <div className="flex items-center justify-center space-x-2">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900"></div>
-                        <span>Loading transactions...</span>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ) : transactionsError ? (
-                  <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8">
-                      <div className="text-red-600">{transactionsError}</div>
-                    </TableCell>
-                  </TableRow>
-                ) : filteredTransactions.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8">
-                      <div className="text-gray-500">No transactions found</div>
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredTransactions.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell>
-                        {new Date(item.date).toLocaleDateString("id-ID")}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center space-x-2">
-                          {getTransactionIcon(item.type)}
-                          <span className="capitalize">
-                            {item.type.toLowerCase()}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>{item.description}</TableCell>
-                      <TableCell
-                        className={`font-medium ${
-                          item.type === "TOPUP"
-                            ? "text-green-600"
-                            : "text-red-600"
-                        }`}
-                      >
-                        {item.type === "TOPUP" ? "+" : "-"}
-                        {formatCurrency(item.amount)}
-                      </TableCell>
-                      <TableCell>{getStatusBadge(item.status)}</TableCell>
-                      <TableCell className="font-mono text-sm">
-                        {item.reference}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end space-x-2">
-                          {item.actions?.canPay && (
-                            <Button
-                              variant="default"
-                              size="sm"
-                              onClick={() => handlePayNow(item.id)}
-                              className="bg-blue-600 hover:bg-blue-700"
-                            >
-                              Pay Now
-                            </Button>
-                          )}
-                          {item.actions?.canDownloadInvoice && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() =>
-                                handleDownloadInvoice(item.invoice?.id)
-                              }
-                              title="Download Invoice"
-                            >
-                              <Download className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-
-            {/* Pagination Controls */}
-            {pagination.totalPages > 1 && (
-              <div className="flex items-center justify-between px-2 py-4">
-                <div className="text-sm text-gray-700">
-                  Showing {(pagination.page - 1) * pagination.limit + 1} to{" "}
-                  {Math.min(
-                    pagination.page * pagination.limit,
-                    pagination.total
-                  )}{" "}
-                  of {pagination.total} transactions
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+                  {balanceLoading ? (
+                    <div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-8 w-32 rounded"></div>
+                  ) : (
+                    formatCurrency(balance)
+                  )}
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handlePageChange(pagination.page - 1)}
-                    disabled={pagination.page === 1 || transactionsLoading}
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                    Previous
-                  </Button>
-
-                  <div className="flex items-center space-x-1">
-                    {Array.from(
-                      { length: Math.min(5, pagination.totalPages) },
-                      (_, i) => {
-                        let pageNum;
-                        if (pagination.totalPages <= 5) {
-                          pageNum = i + 1;
-                        } else if (pagination.page <= 3) {
-                          pageNum = i + 1;
-                        } else if (
-                          pagination.page >=
-                          pagination.totalPages - 2
-                        ) {
-                          pageNum = pagination.totalPages - 4 + i;
-                        } else {
-                          pageNum = pagination.page - 2 + i;
-                        }
-
-                        return (
-                          <Button
-                            key={pageNum}
-                            variant={
-                              pagination.page === pageNum
-                                ? "default"
-                                : "outline"
-                            }
-                            size="sm"
-                            onClick={() => handlePageChange(pageNum)}
-                            disabled={transactionsLoading}
-                            className="w-8 h-8 p-0"
-                          >
-                            {pageNum}
-                          </Button>
-                        );
-                      }
-                    )}
-                  </div>
-
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handlePageChange(pagination.page + 1)}
-                    disabled={
-                      pagination.page === pagination.totalPages ||
-                      transactionsLoading
-                    }
-                  >
-                    Next
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Available for purchases
+                </p>
               </div>
-            )}
+              <Wallet className="h-12 w-12 text-blue-500" />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Top Up Card */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-gray-600">
+              Top Up Balance
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center flex space-y-4">
+              <Dialog open={isTopUpDialogOpen} onOpenChange={handleDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button className="w-full  cursor-pointer" size="lg">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Top Up Balance
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle>Top Up Balance</DialogTitle>
+                    <DialogDescription>
+                      Add funds to your account. Minimum top-up amount is Rp
+                      50,000.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    {error && (
+                      <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+                        {error}
+                      </div>
+                    )}
+                    <div>
+                      <Input
+                        type="number"
+                        placeholder="Enter amount (minimum Rp 50,000)"
+                        value={topUpAmount}
+                        onChange={(e) => setTopUpAmount(e.target.value)}
+                        className="text-lg"
+                        disabled={topUpLoading}
+                      />
+                    </div>
+
+                    {/* Quick Amount Buttons */}
+                    <div className="grid grid-cols-3 gap-2">
+                      {[100000, 500000, 1000000].map((amount) => (
+                        <Button
+                          key={amount}
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setTopUpAmount(amount.toString())}
+                          disabled={topUpLoading}
+                        >
+                          {formatCurrency(amount)}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsTopUpDialogOpen(false)}
+                      disabled={topUpLoading}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={handleTopUp}
+                      disabled={
+                        !topUpAmount ||
+                        parseInt(topUpAmount) < 50000 ||
+                        topUpLoading
+                      }
+                    >
+                      {topUpLoading ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          Processing...
+                        </>
+                      ) : (
+                        <>
+                          <Plus className="h-4 w-4 mr-2" />
+                          Confirm Top Up
+                        </>
+                      )}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
+            <div className="mt-2">
+              <Button
+                className="w-full cursor-pointer"
+                size="lg"
+                variant="outline"
+                disabled
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Reedem Coupon
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
+
+      {/* Transaction History */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Transaction History</CardTitle>
+          <CardDescription>
+            View your top-ups and service purchases
+          </CardDescription>
+          <div className="flex items-center space-x-2 mt-4">
+            <div className="relative w-full">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input
+                placeholder="Search transactions..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 w-full"
+              />
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Date</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Description</TableHead>
+                <TableHead>Amount</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Reference</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {transactionsLoading ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-8">
+                    <div className="flex items-center justify-center space-x-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900"></div>
+                      <span>Loading transactions...</span>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : transactionsError ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-8">
+                    <div className="text-red-600">{transactionsError}</div>
+                  </TableCell>
+                </TableRow>
+              ) : filteredTransactions.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-8">
+                    <div className="text-gray-500">No transactions found</div>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredTransactions.map((item) => (
+                  <TableRow key={item.id}>
+                    <TableCell>
+                      {new Date(item.date).toLocaleDateString("id-ID")}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center space-x-2">
+                        {getTransactionIcon(item.type)}
+                        <span className="capitalize">
+                          {item.type.toLowerCase()}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell>{item.description}</TableCell>
+                    <TableCell
+                      className={`font-medium ${
+                        item.type === "TOPUP"
+                          ? "text-green-600"
+                          : "text-red-600"
+                      }`}
+                    >
+                      {item.type === "TOPUP" ? "+" : "-"}
+                      {formatCurrency(item.amount)}
+                    </TableCell>
+                    <TableCell>{getStatusBadge(item.status)}</TableCell>
+                    <TableCell className="font-mono text-sm">
+                      {item.reference}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end space-x-2">
+                        {item.actions?.canPay && (
+                          <Button
+                            variant="default"
+                            size="sm"
+                            onClick={() => handlePayNow(item.id)}
+                            className="bg-blue-600 hover:bg-blue-700"
+                          >
+                            Pay Now
+                          </Button>
+                        )}
+                        {item.actions?.canDownloadInvoice && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() =>
+                              handleDownloadInvoice(item.invoice?.id)
+                            }
+                            title="Download Invoice"
+                          >
+                            <Download className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+
+          {/* Pagination Controls */}
+          {pagination.totalPages > 1 && (
+            <div className="flex items-center justify-between px-2 py-4">
+              <div className="text-sm text-gray-700">
+                Showing {(pagination.page - 1) * pagination.limit + 1} to{" "}
+                {Math.min(pagination.page * pagination.limit, pagination.total)}{" "}
+                of {pagination.total} transactions
+              </div>
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(pagination.page - 1)}
+                  disabled={pagination.page === 1 || transactionsLoading}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Previous
+                </Button>
+
+                <div className="flex items-center space-x-1">
+                  {Array.from(
+                    { length: Math.min(5, pagination.totalPages) },
+                    (_, i) => {
+                      let pageNum;
+                      if (pagination.totalPages <= 5) {
+                        pageNum = i + 1;
+                      } else if (pagination.page <= 3) {
+                        pageNum = i + 1;
+                      } else if (pagination.page >= pagination.totalPages - 2) {
+                        pageNum = pagination.totalPages - 4 + i;
+                      } else {
+                        pageNum = pagination.page - 2 + i;
+                      }
+
+                      return (
+                        <Button
+                          key={pageNum}
+                          variant={
+                            pagination.page === pageNum ? "default" : "outline"
+                          }
+                          size="sm"
+                          onClick={() => handlePageChange(pageNum)}
+                          disabled={transactionsLoading}
+                          className="w-8 h-8 p-0"
+                        >
+                          {pageNum}
+                        </Button>
+                      );
+                    }
+                  )}
+                </div>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(pagination.page + 1)}
+                  disabled={
+                    pagination.page === pagination.totalPages ||
+                    transactionsLoading
+                  }
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Midtrans Snap.js Script */}
       <Script
