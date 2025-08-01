@@ -107,7 +107,7 @@ export default function UserDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-4">
+      <div className="w-full">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-center h-64">
             <div className="text-lg">Loading your subscriptions...</div>
@@ -118,7 +118,7 @@ export default function UserDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-2 sm:pt-2 lg:pt-2">
+    <div className="w-full">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">

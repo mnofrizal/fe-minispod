@@ -24,7 +24,7 @@ export default function AdminDashboard() {
   const user = session?.user;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-4">
+    <div className="w-full">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">

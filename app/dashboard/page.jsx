@@ -1,9 +1,10 @@
 "use client";
 
-import { useSession, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import UserDashboard from "@/components/UserDashboard";
 import AdminDashboard from "@/components/AdminDashboard";
+import DashboardLayout from "@/components/DashboardLayout";
 
 export default function Dashboard() {
   const { data: session, status } = useSession();
@@ -19,32 +20,34 @@ export default function Dashboard() {
   const user = session.user;
   const isAdmin = user.role === "ADMINISTRATOR";
 
-  // If user is admin, show tabs at the top
+  // If user is admin, show tabs for switching views
   if (isAdmin) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8">
+      <DashboardLayout>
         <div className="max-w-6xl mx-auto">
-          {/* Admin Tab Selection at the top */}
-
           <Tabs defaultValue="admin" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 max-w-md">
+            <TabsList className="grid w-full grid-cols-2 max-w-md mb-6">
               <TabsTrigger value="user">As User</TabsTrigger>
               <TabsTrigger value="admin">As Admin</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="user" className="">
+            <TabsContent value="user">
               <UserDashboard />
             </TabsContent>
 
-            <TabsContent value="admin" className="">
+            <TabsContent value="admin">
               <AdminDashboard />
             </TabsContent>
           </Tabs>
         </div>
-      </div>
+      </DashboardLayout>
     );
   } else {
-    // Regular user - just show UserDashboard without tabs
-    return <UserDashboard />;
+    // Regular user - just show UserDashboard with sidebar
+    return (
+      <DashboardLayout>
+        <UserDashboard />
+      </DashboardLayout>
+    );
   }
 }

@@ -1,8 +1,9 @@
 import { Geist, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
-import Navbar from "@/components/Navbar";
 import { Toaster } from "@/components/ui/sonner";
+import ConditionalNavbar from "@/components/ConditionalNavbar";
+import LayoutWrapper from "@/components/LayoutWrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,11 +33,11 @@ export default function RootLayout({ children }) {
         className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} antialiased bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100`}
       >
         <Providers>
-          <div className="min-h-screen flex flex-col">
-            <Navbar />
-            <main className="flex-1">{children}</main>
-            <Toaster />
-          </div>
+          <ConditionalNavbar />
+          <LayoutWrapper>
+            {children}
+          </LayoutWrapper>
+          <Toaster />
         </Providers>
       </body>
     </html>

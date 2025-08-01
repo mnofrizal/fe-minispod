@@ -40,6 +40,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import DashboardLayout from "@/components/DashboardLayout";
 
 export default function BillingPage() {
   const { data: session } = useSession();
@@ -413,7 +414,7 @@ export default function BillingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8">
+    <DashboardLayout>
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
@@ -748,6 +749,6 @@ export default function BillingPage() {
         onLoad={() => setSnapLoaded(true)}
         strategy="lazyOnload"
       />
-    </div>
+    </DashboardLayout>
   );
 }

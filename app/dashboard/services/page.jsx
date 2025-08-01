@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import ServiceCard from "@/components/ServiceCard";
+import DashboardLayout from "@/components/DashboardLayout";
 import {
   Card,
   CardContent,
@@ -142,7 +143,7 @@ export default function ServicesPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8">
+      <DashboardLayout>
         <div className="max-w-6xl mx-auto">
           <Card>
             <CardHeader>
@@ -156,12 +157,12 @@ export default function ServicesPage() {
             </CardContent>
           </Card>
         </div>
-      </div>
+      </DashboardLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8">
+    <DashboardLayout>
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -274,6 +275,6 @@ export default function ServicesPage() {
           </div>
         )}
       </div>
-    </div>
+    </DashboardLayout>
   );
 }
