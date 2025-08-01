@@ -20,6 +20,7 @@ import {
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -38,14 +39,17 @@ const userMenuItems = [
     icon: LayoutDashboard,
   },
   {
-    title: "Services",
-    url: "/dashboard/services",
-    icon: Server,
-  },
-  {
     title: "Billing",
     url: "/dashboard/billing",
     icon: CreditCard,
+  },
+];
+
+const userExploreItems = [
+  {
+    title: "Services",
+    url: "/dashboard/services",
+    icon: Server,
   },
 ];
 
@@ -114,6 +118,9 @@ export default function DashboardSidebar() {
 
       <SidebarContent>
         <SidebarGroup>
+          <SidebarGroupLabel>
+            {isAdmin ? "Admin Panel" : "Menu"}
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map((item) => (
@@ -121,7 +128,7 @@ export default function DashboardSidebar() {
                   <SidebarMenuButton
                     asChild
                     isActive={pathname === item.url}
-                    className="w-full justify-start"
+                    className="w-full justify-start h-10"
                   >
                     <Link href={item.url} className="flex items-center gap-3">
                       <item.icon className="h-4 w-4" />
@@ -134,10 +141,40 @@ export default function DashboardSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
+        {!isAdmin && (
+          <>
+            <SidebarGroup>
+              <SidebarGroupLabel>Explore</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {userExploreItems.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={pathname === item.url}
+                        className="w-full justify-start h-10"
+                      >
+                        <Link
+                          href={item.url}
+                          className="flex items-center gap-3"
+                        >
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </>
+        )}
+
         {isAdmin && (
           <>
             <SidebarSeparator />
             <SidebarGroup>
+              <SidebarGroupLabel>User View</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
                   <SidebarMenuItem>

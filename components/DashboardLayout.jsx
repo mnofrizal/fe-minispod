@@ -209,7 +209,9 @@ export default function DashboardLayout({ children }) {
                 </DropdownMenu>
               </header>
 
-              <main className="flex-1 p-6 overflow-y-auto">{children}</main>
+              <main className="flex-1 overflow-y-auto p-6 px-12">
+                {children}
+              </main>
             </div>
           </SidebarInset>
         </div>
