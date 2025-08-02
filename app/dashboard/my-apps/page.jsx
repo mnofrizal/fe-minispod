@@ -23,7 +23,10 @@ import {
   List,
   Calendar,
   Globe,
+  Plus,
 } from "lucide-react";
+import Link from "next/link";
+import SubscriptionCard from "@/components/SubscriptionCard";
 
 export default function MyAppsPage() {
   const { data: session } = useSession();
@@ -161,26 +164,36 @@ export default function MyAppsPage() {
   return (
     <DashboardLayout>
       <div className="w-full space-y-6">
-        {/* Header */}
-        <div>
-          <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-3xl font-semibold text-gray-900 dark:text-white">
-              My Apps
-            </h1>
+        <div className="">
+          <div className="flex items-center gap-3 mb-2 justify-between">
+            <div className="">
+              <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
+                My Apps
+              </h1>
+              <p className="text-gray-600 text-sm dark:text-gray-400">
+                Manage and access all your subscribed applications
+              </p>
+            </div>
+            <Button asChild className=" text-white" size="lg">
+              <Link href="/dashboard/services">
+                <span className="flex items-center gap-2">
+                  <Plus className="h-5 w-5" />
+                  Create App
+                </span>
+              </Link>
+            </Button>
           </div>
-          <p className="text-gray-600 text-sm dark:text-gray-400">
-            Manage and access all your subscribed applications
-          </p>
         </div>
+        {/* Header */}
         {/* Search and View Controls */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+        <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center border-b pb-5">
           <div className="relative flex-1 ">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
               placeholder="Search apps..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 w-full"
+              className="pl-10 w-full h-11"
             />
           </div>
           <div className="flex items-center ">
@@ -188,7 +201,7 @@ export default function MyAppsPage() {
               variant={viewMode === "card" ? "default" : "outline"}
               size="sm"
               onClick={() => setViewMode("card")}
-              className="flex items-center gap-2 rounded-r-none"
+              className="flex items-center gap-2 rounded-r-none h-10 w-10"
             >
               <Grid3X3 className="w-4 h-4" />
             </Button>
@@ -196,7 +209,7 @@ export default function MyAppsPage() {
               variant={viewMode === "list" ? "default" : "outline"}
               size="sm"
               onClick={() => setViewMode("list")}
-              className="flex items-center gap-2 rounded-l-none"
+              className="flex items-center gap-2 rounded-l-none h-10 w-10"
             >
               <List className="w-4 h-4" />
             </Button>
@@ -255,112 +268,11 @@ export default function MyAppsPage() {
         ) : viewMode === "card" ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredSubscriptions.map((subscription) => (
-              <Card
+              <SubscriptionCard
                 key={subscription.id}
-                className="hover:shadow-xl transition-all duration-300 group border gap-2 "
-              >
-                <CardHeader className="pb-0">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
-                          <AppWindow className="w-7 h-7 text-blue-600 dark:text-blue-400" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <CardTitle className="text-lg truncate text-gray-900 dark:text-white">
-                            {subscription.service.displayName}
-                          </CardTitle>
-                          <CardDescription className="text-sm text-gray-500 dark:text-gray-400">
-                            {subscription.service.name}
-                          </CardDescription>
-                        </div>
-                      </div>
-                    </div>
-                    <Badge
-                      className={`text-white text-xs font-medium px-2 py-1 ${getStatusColor(
-                        subscription.status
-                      )}`}
-                    >
-                      {getStatusText(subscription.status)}
-                    </Badge>
-                  </div>
-                </CardHeader>
-
-                <CardContent className="space-y-4">
-                  {/* App URL */}
-                  {subscription.subdomain && (
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                        <Globe className="w-4 h-4" />
-                        <span>App URL</span>
-                      </div>
-                      <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-3 border">
-                        <p className="text-sm font-mono text-gray-700 dark:text-gray-300 truncate">
-                          {subscription.subdomain}.yourdomain.com
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Expiry Date */}
-                  <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-700">
-                    <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                      <Calendar className="w-4 h-4" />
-                      <span>Expires</span>
-                    </div>
-                    <span className="text-sm text-gray-500 font-medium   dark:text-white">
-                      {formatDate(subscription.expiresAt)}
-                    </span>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="flex gap-2 ">
-                    {subscription.status === "ACTIVE" &&
-                    subscription.subdomain ? (
-                      <>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="flex-1 bg-blue-600 hover:bg-blue-700 hover:text-white text-white cursor-pointer"
-                          onClick={() =>
-                            window.open(
-                              `https://${subscription.subdomain}.yourdomain.com`,
-                              "_blank"
-                            )
-                          }
-                        >
-                          <ExternalLink className="w-4 h-4 mr-2" />
-                          Open App
-                        </Button>
-                        <Button
-                          size="sm"
-                          className=" cursor-pointer"
-                          variant="outline"
-                          onClick={() =>
-                            window.open(
-                              `https://${subscription.subdomain}.yourdomain.com/admin`,
-                              "_blank"
-                            )
-                          }
-                        >
-                          Manage
-                        </Button>
-                      </>
-                    ) : (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="flex-1"
-                        disabled
-                      >
-                        {subscription.status === "PENDING_DEPLOYMENT"
-                          ? "Deploying..."
-                          : "Unavailable"}
-                      </Button>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+                subscription={subscription}
+                showManageButton={true}
+              />
             ))}
           </div>
         ) : (
@@ -371,8 +283,12 @@ export default function MyAppsPage() {
                 className="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors border rounded-lg"
               >
                 <div className="flex items-center gap-4 flex-1 min-w-0">
-                  <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
-                    <AppWindow className="w-7 h-7 text-blue-600 dark:text-blue-400" />
+                  <div className="p-2 bg-gray-100 border dark:bg-blue-900 rounded-lg">
+                    <img
+                      src={subscription.service.icon}
+                      alt={subscription.service.displayName || service.name}
+                      className="w-9 h-9 object-contain"
+                    />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 mb-1">
@@ -424,14 +340,11 @@ export default function MyAppsPage() {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() =>
-                            window.open(
-                              `https://${subscription.subdomain}.yourdomain.com/admin`,
-                              "_blank"
-                            )
-                          }
+                          asChild
                         >
-                          Manage
+                          <Link href={`/dashboard/my-apps/${subscription.id}`}>
+                            Manage
+                          </Link>
                         </Button>
                       </>
                     ) : (

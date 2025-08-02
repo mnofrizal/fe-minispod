@@ -16,6 +16,8 @@ import {
   LogOut,
   AppWindow,
   ChevronUp,
+  Box,
+  Cloud,
 } from "lucide-react";
 import {
   Sidebar,
@@ -51,12 +53,7 @@ const userMenuItems = [
   {
     title: "My Apps",
     url: "/dashboard/my-apps",
-    icon: AppWindow,
-  },
-  {
-    title: "Billing",
-    url: "/dashboard/billing",
-    icon: CreditCard,
+    icon: Box,
   },
 ];
 
@@ -64,7 +61,20 @@ const userExploreItems = [
   {
     title: "Apps List",
     url: "/dashboard/services",
-    icon: Server,
+    icon: Cloud,
+  },
+];
+
+const userAccountItems = [
+  {
+    title: "Billing",
+    url: "/dashboard/billing",
+    icon: CreditCard,
+  },
+  {
+    title: "Setting",
+    url: "/dashboard/settings",
+    icon: Settings,
   },
 ];
 
@@ -190,6 +200,39 @@ export default function DashboardSidebar() {
               <SidebarGroupContent>
                 <SidebarMenu>
                   {userExploreItems.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={pathname === item.url}
+                        tooltip={item.title}
+                        className="w-full justify-start h-10 data-[active=true]:bg-gray-200 data-[active=true]:text-gray-900 dark:data-[active=true]:bg-gray-700 dark:data-[active=true]:text-gray-100"
+                      >
+                        <Link
+                          href={item.url}
+                          className="flex items-center gap-3"
+                          onClick={() => {
+                            if (state === "collapsed") {
+                              // Don't expand sidebar on navigation in collapsed mode
+                              return;
+                            }
+                            // Close mobile sidebar if open
+                            setOpenMobile(false);
+                          }}
+                        >
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+            <SidebarGroup>
+              <SidebarGroupLabel>Account</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {userAccountItems.map((item) => (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton
                         asChild

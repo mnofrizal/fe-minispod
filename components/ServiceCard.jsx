@@ -39,7 +39,7 @@ export default function ServiceCard({ service }) {
     if (numPrice === 0) return "Free";
     // Convert USD to IDR (assuming price is in USD)
     // If price is already in IDR, remove the multiplication
-    return `Rp ${numPrice.toLocaleString()}/month`;
+    return `Rp ${numPrice.toLocaleString("id-ID")}/month`;
   };
 
   const handleSubscribe = async () => {
@@ -113,12 +113,9 @@ export default function ServiceCard({ service }) {
 
   return (
     <>
-      <Card
-        className="cursor-pointer hover:shadow-lg transition-shadow duration-200 h-full flex flex-col"
-        onClick={handleDialogOpen}
-      >
+      <Card className="hover:shadow-lg transition-shadow duration-200 h-full flex flex-col pb-0  gap-5">
         <CardHeader>
-          <div className="flex items-start justify-between">
+          <div className="flex items-start justify-between p-2">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-gray-100 border dark:bg-blue-900 rounded-lg">
                 <img
@@ -131,36 +128,63 @@ export default function ServiceCard({ service }) {
                 <CardTitle className="text-lg ">
                   {service.displayName}
                 </CardTitle>
-                <CardDescription className="text-sm text-gray-500 ">
-                  {service.category}
-                </CardDescription>
+                <div className="mt-1">
+                  <span className="rounded-full inline-block bg-green-100 text-green-800 text-xs font-medium px-2 py-0.5 rounded dark:bg-v-900 dark:text-green-200">
+                    {service.category}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
         </CardHeader>
-        <CardContent className="flex-1 flex flex-col">
+        <CardContent className="flex-1 flex flex-col px-8">
           <div className="flex-1">
             <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-3 text-justify leading-relaxed mb-2">
               {service.description}
             </p>
           </div>
-
-          <div className="flex items-center justify-between mt-4">
-            <div className="flex items-center gap-2">
-              <DollarSign className="w-4 h-4 text-green-600" />
-              <Badge
-                variant={
-                  parseFloat(service.monthlyPrice) === 0
-                    ? "secondary"
-                    : "default"
-                }
-              >
-                {formatRupiahPrice(service.monthlyPrice)}
-              </Badge>
-            </div>
-            <Badge variant="outline">{service.variantDisplayName}</Badge>
-          </div>
         </CardContent>
+        {/* Pricing Section */}
+        <div className="space-y-3 bg-[#FBFBFC] p-6 px-8 border-t rounded-b-lg">
+          <div className="flex items-center justify-between">
+            <div className="space-y-2">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Starting from
+              </p>
+              <div className="flex items-center gap-2">
+                <span className="text-2xl text-gray-900 dark:text-white">
+                  {formatRupiahPrice(service.monthlyPrice) === "Free" ? (
+                    <span className="font-semibold">Free</span>
+                  ) : (
+                    <>
+                      <span className="font-semibold">
+                        {formatRupiahPrice(service.monthlyPrice).replace(
+                          /\/month$/,
+                          ""
+                        )}
+                      </span>
+                      <span className="font-light text-zinc-500 text-lg">
+                        /month
+                      </span>
+                    </>
+                  )}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Deploy Now Button */}
+          <Button
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent card click
+              handleDialogOpen();
+            }}
+            className="w-full cursor-pointer bg-zinc-900 text-white font-medium py-2 h-10 px-4 rounded-md transition-colors duration-200 hover:bg-zinc-800 hover:text-white"
+            size="sm"
+          >
+            Deploy Now
+          </Button>
+        </div>
       </Card>
 
       {/* Service Detail Dialog */}
@@ -168,8 +192,12 @@ export default function ServiceCard({ service }) {
         <DialogContent className="max-w-[85vw] w-[85vw] max-h-[80vh] overflow-y-auto scrollbar-hide sm:max-w-[75vw] sm:w-[75vw]">
           <DialogHeader>
             <div className="flex items-center gap-3">
-              <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-lg">
-                <Server className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+              <div className="p-2 bg-gray-100 border dark:bg-blue-900 rounded-lg">
+                <img
+                  src={service.icon}
+                  alt={service.displayName || service.name}
+                  className="w-9 h-9 object-contain"
+                />
               </div>
               <div>
                 <DialogTitle className="text-xl">
@@ -196,7 +224,7 @@ export default function ServiceCard({ service }) {
                           variant.availableQuota === 0
                             ? "border-red-200 bg-red-50 dark:bg-red-900/20 cursor-not-allowed opacity-60"
                             : selectedVariant?.id === variant.id
-                            ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20 cursor-pointer"
+                            ? "border-blue-500 border-2 bg-blue-50 dark:bg-blue-900/20 cursor-pointer"
                             : "border-gray-200 dark:border-gray-700 hover:border-gray-300 cursor-pointer"
                         }`}
                         onClick={() => {
@@ -208,7 +236,10 @@ export default function ServiceCard({ service }) {
                         <div className="flex justify-between items-start">
                           <div className="flex-1 space-y-3">
                             <div className="flex items-center gap-2">
-                              <h5 className="font-medium text-gray-900 dark:text-white">
+                              <div className="bg-zinc-200  rounded-md">
+                                <Server className="w-4 h-4 text-gray-900" />
+                              </div>
+                              <h5 className="font-medium text-gray-900 dark:text-white text-xl">
                                 {variant.variantDisplayName}
                               </h5>
                               {variant.isDefault && (
@@ -217,33 +248,38 @@ export default function ServiceCard({ service }) {
                                 </Badge>
                               )}
                             </div>
-                            <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                            <div className="text-sm text-zinc-600 dark:text-gray-400 mt-1">
                               {variant.description}
                             </div>
-                            <div className="space-y-1">
-                              {(variant.cpuSpec || variant.memSpec) && (
-                                <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-3">
-                                  {variant.cpuSpec && (
-                                    <div className="flex items-center gap-1">
-                                      <Cpu className="w-3 h-3" />
-                                      <span>{variant.cpuSpec}</span>
-                                    </div>
-                                  )}
-                                  {variant.memSpec && (
-                                    <div className="flex items-center gap-1">
-                                      <MemoryStick className="w-3 h-3" />
-                                      <span>{variant.memSpec}</span>
-                                    </div>
-                                  )}
-                                </div>
+                            <div className="flex flex-wrap gap-2">
+                              {variant.cpuSpec && (
+                                <Badge
+                                  variant="outline"
+                                  className="flex items-center gap-1 px-2 py-1 text-xs"
+                                >
+                                  <Cpu className="w-3 h-3 mr-1" />
+                                  {variant.cpuSpec}
+                                </Badge>
+                              )}
+                              {variant.memSpec && (
+                                <Badge
+                                  variant="outline"
+                                  className="flex items-center gap-1 px-2 py-1 text-xs"
+                                >
+                                  <MemoryStick className="w-3 h-3 mr-1" />
+                                  {variant.memSpec}
+                                </Badge>
                               )}
                               {variant.availableQuota === 0 && (
-                                <div className="text-xs text-red-600 font-medium">
+                                <Badge
+                                  variant="destructive"
+                                  className="text-xs font-medium"
+                                >
                                   Out of Quota
-                                </div>
+                                </Badge>
                               )}
                             </div>
-                            {variant.features &&
+                            {/* {variant.features &&
                               variant.features.length > 0 && (
                                 <div className="mt-2">
                                   <div className="text-xs text-gray-600 dark:text-gray-400 flex items-center gap-1 flex-wrap">
@@ -285,12 +321,26 @@ export default function ServiceCard({ service }) {
                                     )}
                                   </div>
                                 </div>
-                              )}
+                              )} */}
                           </div>
                           <div className="text-right">
-                            <div className="text-lg font-bold text-gray-900 dark:text-white">
-                              {formatRupiahPrice(variant.monthlyPrice)}
-                            </div>
+                            <span className="text-xl text-gray-900 dark:text-white">
+                              {formatRupiahPrice(service.monthlyPrice) ===
+                              "Free" ? (
+                                <span className="font-bold">Free</span>
+                              ) : (
+                                <>
+                                  <span className="font-bold">
+                                    {formatRupiahPrice(
+                                      service.monthlyPrice
+                                    ).replace(/\/month$/, "")}
+                                  </span>
+                                  <span className="font-light text-zinc-500 text-lg">
+                                    /month
+                                  </span>
+                                </>
+                              )}
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -344,60 +394,59 @@ export default function ServiceCard({ service }) {
             {/* Right Grid - Deployment Summary */}
             <div className="lg:col-span-1">
               <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-sm">
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
                   Deployment Summary
                 </h3>
 
                 <div className="space-y-6">
-                  <div>
-                    <span className="text-sm text-gray-500 dark:text-gray-400 block mb-1">
-                      Service Type
-                    </span>
-                    <span className="text-lg font-bold text-gray-900 dark:text-white">
-                      {service.name}
-                    </span>
-                  </div>
-
-                  <div>
-                    <span className="text-sm text-gray-500 dark:text-gray-400 block mb-1">
-                      Plan
-                    </span>
-                    <span className="text-lg font-bold text-gray-900 dark:text-white">
-                      {selectedVariant?.variantDisplayName || service.version}
-                    </span>
-                  </div>
-
-                  <div>
-                    <span className="text-sm text-gray-500 dark:text-gray-400 block mb-1">
-                      Resources
-                    </span>
-                    <div className="text-sm text-gray-700 dark:text-gray-300 space-y-1">
-                      <div className="flex items-center gap-2">
-                        <Cpu className="w-4 h-4" />
-                        <span>
-                          {selectedVariant?.cpuSpec ||
-                            service.defaultVariant?.cpuSpec}
-                        </span>
+                  <div className="border rounded-lg p-2 bg-zinc-50">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-white border dark:bg-blue-900 rounded-lg">
+                        <img
+                          src={service.icon}
+                          alt={service.displayName || service.name}
+                          className="w-7 h-7 object-contain"
+                        />
                       </div>
-                      <div className="flex items-center gap-2">
-                        <MemoryStick className="w-4 h-4" />
-                        <span>
-                          {selectedVariant?.memSpec ||
-                            service.defaultVariant?.memSpec}
+                      <div className="flex flex-col">
+                        <span className="font-semibold">
+                          {service.displayName}
+                        </span>
+                        <span className="text-sm text-zinc-500">
+                          {service.category}
                         </span>
                       </div>
                     </div>
                   </div>
 
-                  <div>
-                    <span className="text-sm text-gray-500 dark:text-gray-400 block mb-1">
+                  <div className="grid grid-cols-2 gap-y-4 text-sm">
+                    <div className="text-gray-500 dark:text-gray-400">Plan</div>
+                    <div className="font-medium text-gray-900 dark:text-white text-right">
+                      {selectedVariant?.variantDisplayName || service.version}
+                    </div>
+                    <div className="text-gray-500 dark:text-gray-400">CPU</div>
+                    <div className="font-medium text-gray-900 dark:text-gray-300 flex items-center gap-2 justify-end text-right">
+                      <span>
+                        {selectedVariant?.cpuSpec ||
+                          service.defaultVariant?.cpuSpec}
+                      </span>
+                    </div>
+                    <div className="text-gray-500 dark:text-gray-400">
+                      Memory
+                    </div>
+                    <div className="font-medium text-gray-900 dark:text-gray-300 flex items-center gap-2 justify-end text-right">
+                      <span>
+                        {selectedVariant?.memSpec ||
+                          service.defaultVariant?.memSpec}
+                      </span>
+                    </div>
+                    <div className="text-gray-500 dark:text-gray-400">
                       Billing Cycle
-                    </span>
-                    <span className="text-lg font-bold text-gray-900 dark:text-white">
+                    </div>
+                    <div className="font-medium  text-gray-900 dark:text-white text-right">
                       Monthly
-                    </span>
+                    </div>
                   </div>
-
                   <Separator className="my-6" />
 
                   <div className="flex justify-between items-center">
@@ -410,9 +459,7 @@ export default function ServiceCard({ service }) {
                       )}
                     </span>
                   </div>
-                </div>
 
-                <div className="mt-8 space-y-4">
                   {/* Error Message */}
                   {subscriptionError && (
                     <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
@@ -430,7 +477,7 @@ export default function ServiceCard({ service }) {
                   <Button
                     onClick={handleSubscribe}
                     disabled={isSubscribing || subscriptionSuccess}
-                    className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
+                    className="w-full h-10 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
                   >
                     {isSubscribing ? (
                       <>
