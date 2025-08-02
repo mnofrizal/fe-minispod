@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import {
   SidebarProvider,
   SidebarInset,
@@ -40,10 +41,43 @@ import {
   LogOut,
 } from "lucide-react";
 
+// Cookie utility functions
+const getCookie = (name) => {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(";").shift();
+  return null;
+};
+
+const setCookie = (name, value, days = 7) => {
+  const expires = new Date();
+  expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
+  document.cookie = `${name}=${value}; expires=${expires.toUTCString()}; path=/`;
+};
+
 export default function DashboardLayout({ children }) {
   const pathname = usePathname();
   const { data: session } = useSession();
   const user = session?.user;
+  const [sidebarOpen, setSidebarOpen] = useState(null); // Start with null to prevent flickering
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  // Load sidebar state from cookies on mount
+  useEffect(() => {
+    const savedState = getCookie("sidebar-state");
+    if (savedState !== null) {
+      setSidebarOpen(savedState === "true");
+    } else {
+      setSidebarOpen(true); // Default to true if no saved state
+    }
+    setIsLoaded(true);
+  }, []);
+
+  // Save sidebar state to cookies when it changes
+  const handleSidebarOpenChange = (open) => {
+    setSidebarOpen(open);
+    setCookie("sidebar-state", open.toString());
+  };
 
   const handleSignOut = async () => {
     await signOut({ callbackUrl: "/" });
@@ -121,12 +155,25 @@ export default function DashboardLayout({ children }) {
 
   const breadcrumbs = getBreadcrumbs();
 
+  // Don't render until we've loaded the sidebar state
+  if (!isLoaded) {
+    return (
+      <div className="h-screen bg-gray-100 dark:bg-gray-950 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="h-screen bg-gray-100 dark:bg-gray-950">
-      <SidebarProvider>
+      <SidebarProvider
+        open={sidebarOpen}
+        onOpenChange={handleSidebarOpenChange}
+        defaultOpen={sidebarOpen}
+      >
         <div className="flex h-screen w-full">
           <DashboardSidebar />
-          <SidebarInset className="flex-1">
+          <SidebarInset className="flex-1 ">
             {/* Main Content Card */}
             <div className="flex flex-col h-full bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800">
               {/* Header with sidebar trigger and breadcrumbs */}
