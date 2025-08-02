@@ -13,12 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import {
-  Activity,
-  CreditCard,
-  Server,
-  Calendar,
-} from "lucide-react";
+import { Activity, Server, Calendar, Wallet } from "lucide-react";
 import SubscriptionCard from "@/components/SubscriptionCard";
 
 export default function UserDashboard() {
@@ -129,9 +124,7 @@ export default function UserDashboard() {
     (s) => s.status === "ACTIVE"
   ).length;
   const totalSubscriptions = subscriptions.length;
-  const pendingSubscriptions = subscriptions.filter(
-    (s) => s.status === "PENDING_DEPLOYMENT"
-  ).length;
+  const accountBalance = 125000; // Dummy balance in IDR
   const expiringSubscriptions = subscriptions.filter((s) => {
     const expiryDate = new Date(s.expiresAt);
     const thirtyDaysFromNow = new Date();
@@ -152,79 +145,91 @@ export default function UserDashboard() {
       </div>
 
       {/* Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Active Subscriptions Card */}
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                  Active Services
-                </p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {activeSubscriptions}
-                </p>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Active Services Card */}
+        <Card className="hover:shadow-md transition-shadow">
+          <CardContent className="p-4 relative">
+            <div className="absolute top-3 right-3">
+              <div className="p-1.5 bg-green-100 dark:bg-green-900 rounded-lg">
+                <Activity className="h-4 w-4 text-green-600 dark:text-green-400" />
               </div>
-              <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
-                <Activity className="h-5 w-5 text-green-600 dark:text-green-400" />
-              </div>
+            </div>
+            <div className="pr-10">
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
+                Active Services
+              </p>
+              <p className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
+                {activeSubscriptions}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Currently running apps
+              </p>
             </div>
           </CardContent>
         </Card>
 
-        {/* Total Subscriptions Card */}
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                  Total Services
-                </p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {totalSubscriptions}
-                </p>
+        {/* Total Services Card */}
+        <Card className="hover:shadow-md transition-shadow">
+          <CardContent className="p-4 relative">
+            <div className="absolute top-3 right-3">
+              <div className="p-1.5 bg-blue-100 dark:bg-blue-900 rounded-lg">
+                <Server className="h-4 w-4 text-blue-600 dark:text-blue-400" />
               </div>
-              <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
-                <Server className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-              </div>
+            </div>
+            <div className="pr-10">
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
+                Total Services
+              </p>
+              <p className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
+                {totalSubscriptions}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                All subscribed apps
+              </p>
             </div>
           </CardContent>
         </Card>
 
-        {/* Pending Deployments Card */}
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                  Pending Deployment
-                </p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {pendingSubscriptions}
-                </p>
+        {/* Account Balance Card */}
+        <Card className="hover:shadow-md transition-shadow">
+          <CardContent className="p-4 relative">
+            <div className="absolute top-3 right-3">
+              <div className="p-1.5 bg-purple-100 dark:bg-purple-900 rounded-lg">
+                <Wallet className="h-4 w-4 text-purple-600 dark:text-purple-400" />
               </div>
-              <div className="p-2 bg-yellow-100 dark:bg-yellow-900 rounded-lg">
-                <CreditCard className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
-              </div>
+            </div>
+            <div className="pr-10">
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
+                Account Balance
+              </p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
+                Rp {accountBalance.toLocaleString()}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Available credit
+              </p>
             </div>
           </CardContent>
         </Card>
 
         {/* Expiring Soon Card */}
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                  Expiring Soon
-                </p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {expiringSubscriptions}
-                </p>
+        <Card className="hover:shadow-md transition-shadow">
+          <CardContent className="p-4 relative">
+            <div className="absolute top-3 right-3">
+              <div className="p-1.5 bg-orange-100 dark:bg-orange-900 rounded-lg">
+                <Calendar className="h-4 w-4 text-orange-600 dark:text-orange-400" />
               </div>
-              <div className="p-2 bg-red-100 dark:bg-red-900 rounded-lg">
-                <Calendar className="h-5 w-5 text-red-600 dark:text-red-400" />
-              </div>
+            </div>
+            <div className="pr-10">
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
+                Expiring Soon
+              </p>
+              <p className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
+                {expiringSubscriptions}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Within 30 days
+              </p>
             </div>
           </CardContent>
         </Card>
