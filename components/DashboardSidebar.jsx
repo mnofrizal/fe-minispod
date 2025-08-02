@@ -15,6 +15,7 @@ import {
   Shield,
   LogOut,
   AppWindow,
+  ChevronUp,
 } from "lucide-react";
 import {
   Sidebar,
@@ -31,7 +32,14 @@ import {
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { signOut } from "next-auth/react";
+import { useState } from "react";
 
 const userMenuItems = [
   {
@@ -98,6 +106,7 @@ export default function DashboardSidebar() {
   const pathname = usePathname();
   const user = session?.user;
   const isAdmin = user?.role === "ADMINISTRATOR";
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const menuItems = isAdmin ? adminMenuItems : userMenuItems;
 
@@ -134,7 +143,7 @@ export default function DashboardSidebar() {
                   <SidebarMenuButton
                     asChild
                     isActive={pathname === item.url}
-                    className="w-full justify-start h-10"
+                    className="w-full justify-start h-10 data-[active=true]:bg-gray-200 data-[active=true]:text-gray-900 dark:data-[active=true]:bg-gray-700 dark:data-[active=true]:text-gray-100"
                   >
                     <Link href={item.url} className="flex items-center gap-3">
                       <item.icon className="h-4 w-4" />
@@ -158,7 +167,7 @@ export default function DashboardSidebar() {
                       <SidebarMenuButton
                         asChild
                         isActive={pathname === item.url}
-                        className="w-full justify-start h-10"
+                        className="w-full justify-start h-10 data-[active=true]:bg-gray-200 data-[active=true]:text-gray-900 dark:data-[active=true]:bg-gray-700 dark:data-[active=true]:text-gray-100"
                       >
                         <Link
                           href={item.url}
@@ -187,7 +196,7 @@ export default function DashboardSidebar() {
                     <SidebarMenuButton
                       asChild
                       isActive={pathname === "/dashboard/user-view"}
-                      className="w-full justify-start"
+                      className="w-full justify-start data-[active=true]:bg-gray-200 data-[active=true]:text-gray-900 dark:data-[active=true]:bg-gray-700 dark:data-[active=true]:text-gray-100"
                     >
                       <Link
                         href="/dashboard/user-view"
@@ -205,39 +214,56 @@ export default function DashboardSidebar() {
         )}
       </SidebarContent>
 
-      <SidebarFooter className="p-4">
-        <div className="space-y-3">
-          {/* User Info */}
-          <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50 dark:bg-gray-800">
-            <Avatar className="h-8 w-8">
-              <AvatarImage src="" alt={user?.name} />
-              <AvatarFallback className="text-xs font-semibold">
-                {user?.name
-                  ?.split(" ")
-                  .map((n) => n[0])
-                  .join("")}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                {user?.name}
-              </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                {user?.email}
-              </p>
-            </div>
-          </div>
-
-          {/* Sign Out Button */}
-          <Button
-            onClick={handleSignOut}
-            variant="ghost"
-            className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950"
-          >
-            <LogOut className="mr-3 h-4 w-4" />
-            Sign Out
-          </Button>
-        </div>
+      <SidebarFooter className="p-0 mb-3 rounded-lg">
+        <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              className="w-full justify-between  h-auto rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700"
+            >
+              <div className="flex items-center gap-3">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src="" alt={user?.name} />
+                  <AvatarFallback className="text-xs font-semibold">
+                    {user?.name
+                      ?.split(" ")
+                      .map((n) => n[0])
+                      .join("")}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0 text-left">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                    {user?.name}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                    {user?.email}
+                  </p>
+                </div>
+              </div>
+              <ChevronUp
+                className={`h-4 w-4 text-gray-500 transition-transform ${
+                  isDropdownOpen ? "rotate-180" : ""
+                }`}
+              />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" side="right" className="w-56 ml-2">
+            <DropdownMenuItem
+              onClick={() => router.push("/dashboard/profile")}
+              className="cursor-pointer"
+            >
+              <User className="mr-2 h-4 w-4" />
+              Profile
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={handleSignOut}
+              className="cursor-pointer text-red-600 hover:text-red-700 focus:text-red-700 dark:text-red-400 dark:hover:text-red-300 dark:focus:text-red-300"
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              Sign Out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </SidebarFooter>
     </Sidebar>
   );
