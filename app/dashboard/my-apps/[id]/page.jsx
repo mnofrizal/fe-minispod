@@ -226,9 +226,9 @@ export default function AppDetailPage() {
           <TabsContent value="overview" className="space-y-6 ">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* App Information */}
-              <Card>
+              <Card className="col-span-2 rounded-md">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-xl">
                     <Globe className="w-5 h-5" />
                     App Information
                   </CardTitle>
@@ -246,9 +246,9 @@ export default function AppDetailPage() {
               </Card>
 
               {/* Resource Specifications */}
-              <Card>
+              <Card className="rounded-md">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-xl">
                     <Server className="w-5 h-5" />
                     Resources
                   </CardTitle>
@@ -279,36 +279,6 @@ export default function AppDetailPage() {
                     </div>
                     <span className="text-sm font-medium">
                       {subscription.variant.diskSpec}
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Quick Stats */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Activity className="w-5 h-5" />
-                    Quick Stats
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-500">Uptime</span>
-                    <span className="text-sm font-medium text-green-600">
-                      {subscription.metrics.uptime}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-500">Response Time</span>
-                    <span className="text-sm font-medium">
-                      {subscription.metrics.avgResponseTime}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-500">This Month</span>
-                    <span className="text-sm font-medium">
-                      {subscription.metrics.visitors} visitors
                     </span>
                   </div>
                 </CardContent>

@@ -9,17 +9,13 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  ExternalLink,
-  Globe,
-  Calendar,
-} from "lucide-react";
+import { ExternalLink, Globe, Calendar } from "lucide-react";
 import Link from "next/link";
 
-export default function SubscriptionCard({ 
-  subscription, 
+export default function SubscriptionCard({
+  subscription,
   showManageButton = true,
-  variant = "default" // "default" or "compact"
+  variant = "default", // "default" or "compact"
 }) {
   const getStatusColor = (status) => {
     switch (status) {
@@ -72,7 +68,10 @@ export default function SubscriptionCard({
               <div className="p-2 bg-gray-100 border dark:bg-blue-900 rounded-lg">
                 <img
                   src={subscription.service.icon}
-                  alt={subscription.service.displayName || subscription.service.name}
+                  alt={
+                    subscription.service.displayName ||
+                    subscription.service.name
+                  }
                   className="w-9 h-9 object-contain"
                 />
               </div>
@@ -81,7 +80,7 @@ export default function SubscriptionCard({
                   {subscription.service.displayName}
                 </CardTitle>
                 <CardDescription className="text-sm text-gray-500 dark:text-gray-400">
-                  {subscription.service.name}
+                  {subscription.service.category}
                 </CardDescription>
               </div>
             </div>
@@ -155,12 +154,7 @@ export default function SubscriptionCard({
               )}
             </>
           ) : (
-            <Button
-              size="sm"
-              variant="outline"
-              className="flex-1"
-              disabled
-            >
+            <Button size="sm" variant="outline" className="flex-1" disabled>
               {subscription.status === "PENDING_DEPLOYMENT"
                 ? "Deploying..."
                 : "Unavailable"}

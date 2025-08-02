@@ -19,7 +19,15 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { Server, DollarSign, Tag, Cpu, MemoryStick } from "lucide-react";
+import {
+  Server,
+  DollarSign,
+  Tag,
+  Cpu,
+  MemoryStick,
+  Rocket,
+  Cloud,
+} from "lucide-react";
 
 export default function ServiceCard({ service }) {
   const { data: session } = useSession();
@@ -179,9 +187,10 @@ export default function ServiceCard({ service }) {
               e.stopPropagation(); // Prevent card click
               handleDialogOpen();
             }}
-            className="w-full cursor-pointer bg-zinc-900 text-white font-medium py-2 h-10 px-4 rounded-md transition-colors duration-200 hover:bg-zinc-800 hover:text-white"
+            className="w-full cursor-pointer bg-zinc-900 text-white font-medium py-2 h-10 px-4 rounded-md transition-colors duration-200 hover:bg-zinc-800 hover:text-white flex items-center justify-center gap-2"
             size="sm"
           >
+            <Cloud className="w-2 h-2 " />
             Deploy Now
           </Button>
         </div>

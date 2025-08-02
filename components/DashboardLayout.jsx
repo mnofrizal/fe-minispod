@@ -114,6 +114,24 @@ export default function DashboardLayout({ children }) {
       });
     }
 
+    if (pathSegments.includes("settings")) {
+      breadcrumbs.push({
+        href: "/dashboard/settings",
+        label: "Settings",
+        icon: CreditCard,
+        isActive: pathname === "/dashboard/settings",
+      });
+    }
+
+    if (pathSegments.includes("my-apps")) {
+      breadcrumbs.push({
+        href: "/dashboard/my-apps",
+        label: "My Apps",
+        icon: CreditCard,
+        isActive: pathname === "/dashboard/my-apps",
+      });
+    }
+
     // Admin routes
     if (pathSegments.includes("admin")) {
       if (pathSegments.includes("users")) {
@@ -236,19 +254,19 @@ export default function DashboardLayout({ children }) {
                       </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
+                    <DropdownMenuItem asChild className=" cursor-pointer">
                       <Link
-                        href="/dashboard/profile"
-                        className="flex items-center"
+                        href="/dashboard/settings"
+                        className="flex items-center "
                       >
                         <User className="mr-2 h-4 w-4" />
                         Profile
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuSeparator />
+
                     <DropdownMenuItem
                       onClick={handleSignOut}
-                      className="text-red-600 focus:text-red-600 dark:text-red-400 dark:focus:text-red-400"
+                      className="text-red-600 focus:text-red-600 dark:text-red-400 dark:focus:text-red-400  cursor-pointer"
                     >
                       <LogOut className="mr-2 h-4 w-4" />
                       Sign Out
