@@ -179,7 +179,8 @@ export default function DashboardLayout({ children }) {
               {/* Header with sidebar trigger and breadcrumbs */}
               <header className="flex h-12 shrink-0 items-center gap-2 px-4 border-b border-gray-200 dark:border-gray-800 rounded-t-xl">
                 <div className="flex items-center gap-2 flex-1">
-                  <SidebarTrigger className="-ml-1 border-0 shadow-none" />
+                  <SidebarTrigger className="-ml-1 border-0 shadow-none cursor-pointer" />
+                  <div className="mx-1 h-4 w-px bg-gray-300 dark:bg-gray-600"></div>
                   <Breadcrumb>
                     <BreadcrumbList>
                       {breadcrumbs.map((breadcrumb, index) => {

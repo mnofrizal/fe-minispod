@@ -119,10 +119,10 @@ export default function UserDashboard() {
     <div className="w-full">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-semibold text-gray-900 dark:text-white">
+        <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
           My Dashboard
         </h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-2">
+        <p className="text-gray-600 dark:text-gray-400 mt-2 text-sm">
           Welcome back, {user?.name}! Here are your active subscriptions.
         </p>
       </div>
