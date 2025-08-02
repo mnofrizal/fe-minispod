@@ -164,18 +164,18 @@ export default function ServicesPage() {
   return (
     <DashboardLayout>
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+      <div className="">
+        <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
           Available Services
         </h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-2">
+        <p className="text-gray-600 dark:text-gray-400 mt-2 text-sm">
           Discover and explore our available services
         </p>
       </div>
 
       {/* Filters and Search */}
-      <Card className="mb-6">
-        <CardContent className="pt-6">
+      <div className="mb-6">
+        <div className="pt-6">
           <div className="flex flex-col sm:flex-row gap-4">
             {/* Search */}
             <div className="relative flex-1">
@@ -184,13 +184,13 @@ export default function ServicesPage() {
                 placeholder="Search services..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 h-11"
               />
             </div>
 
             {/* Price Filter */}
             <Select value={priceFilter} onValueChange={setPriceFilter}>
-              <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectTrigger className="w-full sm:w-[180px] !h-11">
                 <SelectValue placeholder="Filter by price" />
               </SelectTrigger>
               <SelectContent>
@@ -235,8 +235,8 @@ export default function ServicesPage() {
               </Button>
             )}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Services Grid */}
       {loading ? (
@@ -267,7 +267,7 @@ export default function ServicesPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {filteredServices.map((service) => (
             <ServiceCard key={service.name} service={service} />
           ))}

@@ -120,13 +120,19 @@ export default function ServiceCard({ service }) {
         <CardHeader>
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
-                <Server className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+              <div className="p-2 bg-gray-100 border dark:bg-blue-900 rounded-lg">
+                <img
+                  src={service.icon}
+                  alt={service.displayName || service.name}
+                  className="w-9 h-9 object-contain"
+                />
               </div>
               <div>
-                <CardTitle className="text-lg">{service.displayName}</CardTitle>
-                <CardDescription className="text-sm text-gray-500">
-                  {service.name}
+                <CardTitle className="text-lg ">
+                  {service.displayName}
+                </CardTitle>
+                <CardDescription className="text-sm text-gray-500 ">
+                  {service.category}
                 </CardDescription>
               </div>
             </div>
@@ -134,7 +140,7 @@ export default function ServiceCard({ service }) {
         </CardHeader>
         <CardContent className="flex-1 flex flex-col">
           <div className="flex-1">
-            <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-3">
+            <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-3 text-justify leading-relaxed mb-2">
               {service.description}
             </p>
           </div>
