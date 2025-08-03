@@ -13,7 +13,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { Activity, Server, Calendar, Wallet, Plus } from "lucide-react";
+import {
+  Activity,
+  Server,
+  Calendar,
+  Wallet,
+  Plus,
+  MessageSquare,
+} from "lucide-react";
 import SubscriptionCard from "@/components/SubscriptionCard";
 import Link from "next/link";
 
@@ -249,21 +256,9 @@ export default function UserDashboard() {
         )}
 
         {subscriptions.length === 0 ? (
-          <div className="text-center py-8">
-            <div className="text-gray-500 dark:text-gray-400 mb-4">
-              <svg
-                className="mx-auto h-12 w-12 text-gray-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2 2v-5m16 0h-2M4 13h2m13-8V4a1 1 0 00-1-1h-4"
-                />
-              </svg>
+          <div className="text-center py-8 border-dashed border-2 rounded-lg border-zinc-200 bg-zinc-50">
+            <div className="flex justify-center mb-4">
+              <MessageSquare className="text-zinc-400 dark:text-zinc-400 h-12 w-12" />
             </div>
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
               No subscriptions yet
@@ -272,12 +267,11 @@ export default function UserDashboard() {
               You haven't subscribed to any services yet. Browse our services to
               get started.
             </p>
-            <Button
-              onClick={() => (window.location.href = "/dashboard/services")}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              Browse Services
-            </Button>
+            <Link href="/dashboard/services">
+              <Button className="bg-blue-600 hover:bg-blue-700 text-white cursor-pointer">
+                Browse Services
+              </Button>
+            </Link>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

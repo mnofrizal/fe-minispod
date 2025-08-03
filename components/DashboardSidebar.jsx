@@ -304,20 +304,21 @@ export default function DashboardSidebar() {
           </>
         )}
       </SidebarContent>
-      <SidebarSeparator />
-      <SidebarFooter className="p-0 mb-3 mt-3 rounded-lg  bg-[#F6F6F7]">
+
+      <SidebarFooter className="p-0 rounded-lg bg-[#F6F6F7]">
         <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
-              className={`w-full justify-between  h-auto px-2 bg-[#F6F6F7]rounded-xl dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700`}
+              className={`w-full justify-between  h-auto px-1 bg-[#F6F6F7]rounded-xl dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700`}
             >
-              <div className="flex items-center gap-3">
-                <Avatar className="h-10 w-10 ">
+              <div className="flex items-center gap-1">
+                <Avatar className="h-10 w-10 border-2">
                   <AvatarImage src="" alt={user?.name} />
                   <AvatarFallback className="text-xs font-semibold">
                     {user?.name
                       ?.split(" ")
+                      .slice(0, 2)
                       .map((n) => n[0])
                       .join("")}
                   </AvatarFallback>
@@ -325,27 +326,22 @@ export default function DashboardSidebar() {
                 {!isCollapsed && (
                   <div className="flex-1 min-w-0 text-left">
                     <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                      {user?.name}
+                      {user?.name?.split(" ").slice(0, 2).join(" ")}
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate font-l">
                       {user?.email}
                     </p>
                   </div>
                 )}
               </div>
-              {!isCollapsed && (
-                <ChevronUp
-                  className={`h-4 w-4 text-gray-500 transition-transform ${
-                    isDropdownOpen ? "rotate-180" : ""
-                  }`}
-                />
-              )}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium">{user?.name}</p>
+                <p className="text-sm font-medium">
+                  {user?.name?.split(" ").slice(0, 2).join(" ")}
+                </p>
                 <p className="text-xs text-muted-foreground">{user?.email}</p>
               </div>
             </DropdownMenuLabel>

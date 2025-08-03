@@ -127,9 +127,21 @@ export default function DashboardLayout({ children }) {
       breadcrumbs.push({
         href: "/dashboard/my-apps",
         label: "My Apps",
-        icon: CreditCard,
+        icon: Package,
         isActive: pathname === "/dashboard/my-apps",
       });
+
+      // Handle dynamic app detail route
+      const myAppsIndex = pathSegments.indexOf("my-apps");
+      if (myAppsIndex !== -1 && pathSegments[myAppsIndex + 1]) {
+        const appId = pathSegments[myAppsIndex + 1];
+        breadcrumbs.push({
+          href: `/dashboard/my-apps/${appId}`,
+          label: `App Details`,
+          icon: Server,
+          isActive: pathname === `/dashboard/my-apps/${appId}`,
+        });
+      }
     }
 
     // Admin routes
@@ -233,12 +245,13 @@ export default function DashboardLayout({ children }) {
 
                 {/* User Avatar Dropdown */}
                 <DropdownMenu>
-                  <DropdownMenuTrigger className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                  <DropdownMenuTrigger className="flex items-center gap-2 p-1.5  hover:bg-gray-100 rounded-full dark:hover:bg-gray-800 transition-colors">
                     <Avatar className="h-8 w-8">
                       <AvatarImage src="" alt={user?.name} />
                       <AvatarFallback className="text-xs font-semibold">
                         {user?.name
                           ?.split(" ")
+                          .slice(0, 2)
                           .map((n) => n[0])
                           .join("")}
                       </AvatarFallback>

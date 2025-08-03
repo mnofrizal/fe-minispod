@@ -243,8 +243,8 @@ export default function MyAppsPage() {
             </CardContent>
           </Card>
         ) : subscriptions.length === 0 ? (
-          <Card>
-            <CardContent className="pt-6">
+          <Card className="bg-zinc-50">
+            <CardContent className="pt-6 ">
               <div className="text-center py-12">
                 <div className="text-gray-500 dark:text-gray-400 mb-4">
                   <AppWindow className="mx-auto h-16 w-16 text-gray-400" />
@@ -256,12 +256,11 @@ export default function MyAppsPage() {
                   You haven't subscribed to any applications yet. Browse our
                   services to find the perfect apps for your needs.
                 </p>
-                <Button
-                  onClick={() => (window.location.href = "/dashboard/services")}
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                  Browse Services
-                </Button>
+                <Link href="/dashboard/services">
+                  <Button className="bg-blue-600 hover:bg-blue-700 text-white cursor-pointer">
+                    Browse Services
+                  </Button>
+                </Link>
               </div>
             </CardContent>
           </Card>
@@ -337,11 +336,7 @@ export default function MyAppsPage() {
                           <ExternalLink className="w-4 h-4 mr-2" />
                           Open
                         </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          asChild
-                        >
+                        <Button size="sm" variant="outline" asChild>
                           <Link href={`/dashboard/my-apps/${subscription.id}`}>
                             Manage
                           </Link>

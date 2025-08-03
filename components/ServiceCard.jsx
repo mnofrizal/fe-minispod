@@ -28,10 +28,12 @@ import {
   Rocket,
   Cloud,
 } from "lucide-react";
+import Link from "next/link";
 
 export default function ServiceCard({ service }) {
   const { data: session } = useSession();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false);
   const [isSubscribing, setIsSubscribing] = useState(false);
   const [subscriptionError, setSubscriptionError] = useState("");
   const [subscriptionSuccess, setSubscriptionSuccess] = useState(false);
@@ -82,11 +84,10 @@ export default function ServiceCard({ service }) {
       if (response.ok && data.success) {
         setSubscriptionSuccess(true);
         setSubscriptionError("");
-        // Optionally close dialog after successful subscription
-        setTimeout(() => {
-          setIsDialogOpen(false);
-          setSubscriptionSuccess(false);
-        }, 2000);
+        // Close deploy dialog and open success dialog
+        setIsDialogOpen(false);
+        setIsSuccessDialogOpen(true);
+        setSubscriptionSuccess(false);
       } else {
         // Use specific reasons from the API response if available
         let errorMessage = data.message || "Failed to subscribe to service";
@@ -334,14 +335,14 @@ export default function ServiceCard({ service }) {
                           </div>
                           <div className="text-right">
                             <span className="text-xl text-gray-900 dark:text-white">
-                              {formatRupiahPrice(service.monthlyPrice) ===
+                              {formatRupiahPrice(variant.monthlyPrice) ===
                               "Free" ? (
                                 <span className="font-bold">Free</span>
                               ) : (
                                 <>
                                   <span className="font-bold">
                                     {formatRupiahPrice(
-                                      service.monthlyPrice
+                                      variant.monthlyPrice
                                     ).replace(/\/month$/, "")}
                                   </span>
                                   <span className="font-light text-zinc-500 text-lg">
@@ -532,6 +533,90 @@ export default function ServiceCard({ service }) {
                 </div>
               </div>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Success Dialog */}
+      <Dialog open={isSuccessDialogOpen} onOpenChange={setIsSuccessDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <div className="flex flex-col items-center text-center space-y-4">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                <svg
+                  className="w-8 h-8 text-green-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              </div>
+              <div>
+                <DialogTitle className="text-xl text-green-900">
+                  Deployment Successful!
+                </DialogTitle>
+                <DialogDescription className="text-gray-600 mt-2">
+                  Your {service.displayName} service has been successfully
+                  deployed and is now ready to use.
+                </DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4 mt-4">
+            <div className="flex items-start gap-3">
+              <div className="p-1 bg-white border rounded-lg">
+                <img
+                  src={service.icon}
+                  alt={service.displayName}
+                  className="w-6 h-6 object-contain"
+                />
+              </div>
+              <div className="flex-1">
+                <h4 className="font-medium text-green-900">
+                  {service.displayName}
+                </h4>
+                <p className="text-sm text-green-700 mt-1">
+                  Plan:{" "}
+                  {selectedVariant?.variantDisplayName ||
+                    service.defaultVariant?.variantDisplayName}
+                </p>
+                <p className="text-sm text-green-700">
+                  Cost:{" "}
+                  {formatRupiahPrice(
+                    selectedVariant?.monthlyPrice || service.monthlyPrice
+                  )}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2 w-full mt-6">
+            <Link href="/dashboard/my-apps">
+              <Button
+                onClick={() => {
+                  setIsSuccessDialogOpen(false);
+                  // You can add navigation to dashboard or service management here
+                  // router.push('/dashboard/my-apps');
+                }}
+                className="w-full cursor-pointer h-10 flex-1 bg-green-600 hover:bg-green-700 text-white"
+              >
+                View My Apps
+              </Button>
+            </Link>
+            <Button
+              variant="outline"
+              onClick={() => setIsSuccessDialogOpen(false)}
+              className="flex-1 cursor-pointer "
+            >
+              Close
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

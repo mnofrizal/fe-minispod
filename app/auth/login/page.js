@@ -22,6 +22,7 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e) => {
@@ -72,6 +73,29 @@ export default function LoginPage() {
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    setError("");
+    setIsGoogleLoading(true);
+
+    try {
+      const result = await signIn("google", {
+        callbackUrl: "/dashboard",
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setError("Failed to sign in with Google. Please try again.");
+      } else if (result?.url) {
+        // Redirect to the callback URL
+        window.location.href = result.url;
+      }
+    } catch (error) {
+      setError("An error occurred with Google sign-in. Please try again.");
+    } finally {
+      setIsGoogleLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-6">
       <div className="w-full max-w-sm">
@@ -94,8 +118,9 @@ export default function LoginPage() {
           {/* Google Sign In Button */}
           <Button
             type="button"
-            onClick={() => signIn("google")}
-            className="w-full h-16 bg-zinc-100 hover:bg-zinc-200 text-black text-xl font-medium rounded-none transition-colors duration-200 mb-4 flex items-center justify-center gap-3"
+            onClick={handleGoogleSignIn}
+            disabled={isGoogleLoading || isLoading}
+            className="w-full h-16 bg-zinc-100 hover:bg-zinc-200 text-black text-xl font-medium rounded-none transition-colors duration-200 mb-4 flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <svg className="w-8 h-8" viewBox="0 0 24 24">
               <path
@@ -115,8 +140,20 @@ export default function LoginPage() {
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
               />
             </svg>
-            <span className="tracking-tight">Continue with Google</span>
+            <span className="tracking-tight">
+              {isGoogleLoading ? "Signing in..." : "Continue with Google"}
+            </span>
           </Button>
+
+          {/* Divider */}
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-4 bg-gray-50 text-gray-500">or</span>
+            </div>
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -163,8 +200,8 @@ export default function LoginPage() {
 
             <Button
               type="submit"
-              disabled={isLoading}
-              className="w-full h-16 bg-purple-500 hover:bg-purple-600 text-white text-xl font-medium rounded-none transition-colors duration-200"
+              disabled={isLoading || isGoogleLoading}
+              className="w-full h-16 bg-purple-500 hover:bg-purple-600 text-white text-xl font-medium rounded-none transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? "Signing in..." : "Continue with email"}
             </Button>
